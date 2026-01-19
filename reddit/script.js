@@ -1,72 +1,137 @@
+// script.js
+
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('reddit-form');
   const input = document.getElementById('reddit-input');
   const results = document.getElementById('results');
   const filtersDiv = document.getElementById('filters');
-  const loadAllBtn = document.getElementById('load-all-posts');
   const applyFiltersBtn = document.getElementById('apply-filters');
   const clearFiltersBtn = document.getElementById('clear-filters');
+  const paginationDiv = document.getElementById('pagination');
 
   const CORS_PROXY = 'https://corsproxy.io/?';
 
   let allPosts = [];
   let afterUrl = null;
   let baseFetchUrl = '';
+  let currentPage = 1;
+  const POSTS_PER_PAGE = 30;
+  let filteredPosts = [];
+  let sortOrder = 'newest';
+  let isLoadingMore = false;
 
   function extractPosts(doc) {
     let posts = [];
-    // Try new Reddit
-    let containers = Array.from(doc.querySelectorAll('div[data-testid="post-container"]'));
-    if (containers.length > 0) {
-      posts = containers.map(post => {
-        let title = post.querySelector('h3, a.title')?.textContent || 'No title';
-        let link = post.querySelector('a[data-click-id="body"], a.title')?.href || '#';
-        if (link.startsWith('/')) link = 'https://www.reddit.com' + link;
-        let author = post.querySelector('a[data-testid="post_author_link"]')?.textContent || '';
-        let dateElem = post.querySelector('a[data-click-id="timestamp"] > time');
-        let date = dateElem ? dateElem.getAttribute('datetime') : '';
-        return { title, link, author, date };
-      });
-    } else {
-      // Try old Reddit
-      containers = Array.from(doc.querySelectorAll('div.thing.link'));
-      posts = containers.map(post => {
-        let title = post.querySelector('a.title')?.textContent || 'No title';
-        let link = post.querySelector('a.title')?.href || '#';
-        if (link.startsWith('/')) link = 'https://www.reddit.com' + link;
-        let author = post.getAttribute('data-author') || '';
-        let date = post.querySelector('time')?.getAttribute('datetime') || '';
-        return { title, link, author, date };
-      });
-    }
+    let containers = Array.from(doc.querySelectorAll('div.thing.link'));
+    posts = containers.filter(post => {
+      if (post.classList.contains('promotedlink')) return false;
+      if (post.style.display === 'none') return false;
+      return true;
+    }).map(post => {
+      let title = post.querySelector('a.title')?.textContent || 'No title';
+      let commentsLink = post.querySelector('a.comments')?.href || '#';
+      let link = commentsLink.replace('old.reddit.com', 'www.reddit.com');
+      let author = post.getAttribute('data-author') || '';
+      let date = post.querySelector('time')?.getAttribute('datetime') || '';
+      let subreddit = post.getAttribute('data-subreddit') || '';
+      let flair = post.querySelector('span.linkflairlabel')?.textContent || '';
+      return { title, link, author, date, subreddit, flair };
+    });
     return posts;
   }
 
   function extractNextPageUrl(doc) {
-    // Try new Reddit
-    let next = doc.querySelector('span[role="navigation"] a[rel="nofollow next"], a[rel="nofollow next"]');
-    if (next) return next.href;
-    // Try old Reddit
-    let oldNext = doc.querySelector('span.next-button > a');
-    if (oldNext) return oldNext.href;
-    return null;
+    let next = doc.querySelector('span.next-button > a');
+    return next ? next.href : null;
+  }
+
+  function renderSortDropdown() {
+    let sortDiv = document.getElementById('sort-dropdown');
+    if (!sortDiv) {
+      sortDiv = document.createElement('div');
+      sortDiv.id = 'sort-dropdown';
+      results.parentNode.insertBefore(sortDiv, results);
+    }
+    sortDiv.innerHTML = `
+      <label for="sort-select" style="font-weight:500;margin-right:0.5em;">Sort by:</label>
+      <select id="sort-select">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+      </select>
+    `;
+    document.getElementById('sort-select').value = sortOrder;
+    document.getElementById('sort-select').onchange = function() {
+      sortOrder = this.value;
+      applyFilters();
+    };
+  }
+
+  function renderPagination(totalPages) {
+    if (!paginationDiv) return;
+    paginationDiv.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const maxVisiblePages = 6;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = startPage + maxVisiblePages - 1;
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    let eCount = totalPages;
+    let redditLabel = 'R' + 'e'.repeat(eCount) + 'ddit';
+
+    let html = `<div class="nav-word">${redditLabel}</div>`;
+    for (let i = startPage; i <= endPage; i++) {
+      html += `<span class="page-num${i === currentPage ? ' active' : ''}" data-page="${i}">${i}</span> `;
+    }
+    if (endPage < totalPages) {
+      html += `<span class="page-next" data-page="next">&#8594;</span>`;
+    }
+
+    paginationDiv.innerHTML = html;
+
+    Array.from(paginationDiv.querySelectorAll('.page-num')).forEach(el => {
+      el.onclick = function() {
+        currentPage = parseInt(this.getAttribute('data-page'));
+        renderPosts(filteredPosts);
+      };
+    });
+    const nextBtn = paginationDiv.querySelector('.page-next');
+    if (nextBtn) nextBtn.onclick = function() {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderPosts(filteredPosts);
+      }
+    };
   }
 
   function renderPosts(posts) {
-    const results = document.getElementById('results');
+    const feedback = document.getElementById('filter-feedback');
     if (!posts.length) {
-      results.innerHTML = '<p>No posts found or Reddit layout not supported.</p>';
+      results.innerHTML = '<p>No posts found.</p>';
+      if (feedback) feedback.textContent = 'No posts match your filters.';
+      renderPagination(1);
       return;
     }
+    const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+    if (currentPage > totalPages) currentPage = totalPages;
+    const start = (currentPage - 1) * POSTS_PER_PAGE;
+    const end = start + POSTS_PER_PAGE;
     let htmlList = '<ul class="post-list">';
-    posts.forEach(post => {
+    posts.slice(start, end).forEach(post => {
       htmlList += `<li><a href="${post.link}" target="_blank">${post.title}</a>`;
-      if (post.author) htmlList += ` <span style="color:#888;font-size:0.95em;">by ${post.author}</span>`;
-      if (post.date) htmlList += ` <span style="color:#aaa;font-size:0.9em;">[${post.date.split('T')[0]}]</span>`;
+      if (post.flair) htmlList += ` <span style="background:#ddd;border-radius:4px;padding:2px 6px;font-size:0.9em;">${post.flair}</span>`;
+      if (post.subreddit) htmlList += ` <span style="color:#ff4500;">r/${post.subreddit}</span>`;
+      if (post.author) htmlList += ` <span style="color:#888;">by ${post.author}</span>`;
+      if (post.date) htmlList += ` <span style="color:#aaa;">[${post.date.split('T')[0]}]</span>`;
       htmlList += '</li>';
     });
     htmlList += '</ul>';
     results.innerHTML = htmlList;
+    if (feedback) feedback.textContent = `Showing ${posts.length} post${posts.length !== 1 ? 's' : ''}. Page ${currentPage} of ${totalPages}`;
+    renderPagination(totalPages);
   }
 
   function applyFilters() {
@@ -74,15 +139,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const author = document.getElementById('filter-author').value.trim().toLowerCase();
     const dateStart = document.getElementById('filter-date-start').value;
     const dateEnd = document.getElementById('filter-date-end').value;
-    let filtered = allPosts.filter(post => {
+    const flair = document.getElementById('filter-flair')?.value.trim().toLowerCase() || '';
+    currentPage = 1;
+    filteredPosts = allPosts.filter(post => {
       let ok = true;
-      if (keyword && !post.title.toLowerCase().includes(keyword)) ok = false;
-      if (author && post.author.toLowerCase() !== author) ok = false;
-      if (dateStart && post.date) ok = ok && (post.date >= dateStart);
-      if (dateEnd && post.date) ok = ok && (post.date <= dateEnd + 'T23:59:59');
+      if (keyword) {
+        const inTitle = post.title.toLowerCase().includes(keyword);
+        const inAuthor = post.author.toLowerCase().includes(keyword);
+        const inSubreddit = post.subreddit.toLowerCase().includes(keyword);
+        if (!inTitle && !inAuthor && !inSubreddit) ok = false;
+      }
+      if (author && (!post.author || !post.author.toLowerCase().includes(author))) ok = false;
+      if (flair && (!post.flair || !post.flair.toLowerCase().includes(flair))) ok = false;
+      if ((dateStart || dateEnd) && post.date) {
+        const postDate = new Date(post.date);
+        if (dateStart && postDate < new Date(dateStart)) ok = false;
+        if (dateEnd && postDate > new Date(dateEnd)) ok = false;
+      }
       return ok;
     });
-    renderPosts(filtered);
+    filteredPosts.sort((a, b) => {
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+    renderPosts(filteredPosts);
   }
 
   async function fetchAndParse(url) {
@@ -99,9 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
     allPosts = [];
     afterUrl = null;
     let url = input.value.trim();
-    // Always use old.reddit.com for scraping
     if (/^https?:\/\//.test(url)) {
-      // Replace www.reddit.com or reddit.com with old.reddit.com
       baseFetchUrl = url.replace(/^https?:\/\/(www\.)?reddit\.com/, 'https://old.reddit.com');
     } else if (/^r\//i.test(url)) {
       baseFetchUrl = `https://old.reddit.com/${url}/`;
@@ -111,40 +192,54 @@ document.addEventListener('DOMContentLoaded', function () {
       baseFetchUrl = `https://old.reddit.com/r/${url}/`;
     }
     try {
-      const doc = await fetchAndParse(baseFetchUrl);
+      let doc = await fetchAndParse(baseFetchUrl);
       allPosts = extractPosts(doc);
       afterUrl = extractNextPageUrl(doc);
-      renderPosts(allPosts);
       filtersDiv.style.display = '';
-      loadAllBtn.style.display = afterUrl ? '' : 'none';
+      applyFilters();
+      if (afterUrl) loadRemainingPosts();
     } catch (err) {
       results.innerHTML = `<p>Error: ${err.message}</p>`;
       filtersDiv.style.display = 'none';
-      loadAllBtn.style.display = 'none';
+      paginationDiv.style.display = 'none';
     }
   }
 
-  async function loadAllPosts() {
-    loadAllBtn.disabled = true;
-    let nextUrl = afterUrl;
-    while (nextUrl) {
-      results.innerHTML = `<p>Loading more posts... (${allPosts.length})</p>`;
-      try {
-        const doc = await fetchAndParse(nextUrl);
+  async function loadRemainingPosts() {
+    if (isLoadingMore) return;
+    isLoadingMore = true;
+    let pageCount = 1;
+    
+    try {
+      while (afterUrl) {
+        pageCount++;
+        results.innerHTML = `<p>Loading all posts... (Page ${pageCount}, ${allPosts.length} posts loaded so far)</p>`;
+        
+        const doc = await fetchAndParse(afterUrl);
         const newPosts = extractPosts(doc);
+        
+        if (newPosts.length === 0) {
+          break; // No more posts found
+        }
+        
         allPosts = allPosts.concat(newPosts);
-        renderPosts(allPosts);
-        nextUrl = extractNextPageUrl(doc);
-      } catch (err) {
-        break;
+        afterUrl = extractNextPageUrl(doc);
+        
+        // Small delay to avoid overwhelming the server
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
+      
+      results.innerHTML = `<p>Finished loading! Found ${allPosts.length} total posts from all time.</p>`;
+      applyFilters();
+    } catch (err) {
+      results.innerHTML = `<p>Error loading remaining posts: ${err.message}. Loaded ${allPosts.length} posts so far.</p>`;
+      applyFilters();
     }
-    loadAllBtn.disabled = false;
-    loadAllBtn.style.display = 'none';
+    
+    isLoadingMore = false;
   }
 
   form.addEventListener('submit', fetchInitial);
-  loadAllBtn.addEventListener('click', loadAllPosts);
   applyFiltersBtn.addEventListener('click', function(e) {
     e.preventDefault();
     applyFilters();
@@ -155,6 +250,18 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('filter-author').value = '';
     document.getElementById('filter-date-start').value = '';
     document.getElementById('filter-date-end').value = '';
-    renderPosts(allPosts);
+    if (document.getElementById('filter-flair')) document.getElementById('filter-flair').value = '';
+    currentPage = 1;
+    filteredPosts = allPosts;
+    renderPosts(filteredPosts);
   });
-}); 
+
+  renderSortDropdown();
+
+  // // Add Flair Filter Input
+  // const flairInput = document.createElement('input');
+  // flairInput.type = 'text';
+  // flairInput.id = 'filter-flair';
+  // flairInput.placeholder = 'Filter by flair';
+  // filtersDiv.insertBefore(flairInput, applyFiltersBtn);
+});
