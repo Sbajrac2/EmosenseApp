@@ -103,7 +103,7 @@ export default function EmotionMatchingActivity({ navigation, route }) {
       <View style={styles.content}>
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => setShowHintMessage(true)}>
-            <Image source={IMAGES.hint} style={styles.topBarIcon} />
+            <Image source={IMAGES.hint} resizeMode="contain" style={styles.topBarIcon} />
           </TouchableOpacity>
           
           <TouchableOpacity onPress={handleHome} style={styles.homeButton}>
@@ -111,7 +111,7 @@ export default function EmotionMatchingActivity({ navigation, route }) {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => setShowHelpMessage(true)}>
-            <Image source={IMAGES.help} style={styles.topBarIcon} />
+            <Image source={IMAGES.help} resizeMode="contain" style={styles.topBarIcon} />
           </TouchableOpacity>
         </View>
 
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SIZES.margin },
   homeButton: { backgroundColor: COLORS.white, borderRadius: 20, padding: 8 },
   homeIcon: { fontSize: 20 },
-  topBarIcon: { width: 28, height: 28, resizeMode: 'contain' },
+  topBarIcon: { width: 28, height: 28 },
   popupWrapper: {
     position: 'absolute',
     maxWidth: width * 0.7,

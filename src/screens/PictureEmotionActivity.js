@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, Dimensions, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, Dimensions, ScrollView, Animated } from 'react-native';
 
 import SpeakerButton from '../components/SpeakerButton';
 import TTSToggle from '../components/TTSToggle';
@@ -24,202 +24,186 @@ export default function PictureEmotionActivity({ navigation, route }) {
   const [showHintMessage, setShowHintMessage] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [showSecondChance, setShowSecondChance] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(null);
+  const [feedbackAnimation] = useState(new Animated.Value(0));
   const { isTTSEnabled } = useTTS();
   
   const getTasksForEmotion = (targetEmotion) => {
-    const allTasks = {
+    const baseImages = {
       happy: [
-        {
-          image: require('../../assets/images/Happy_real.png'),
-          question: 'What emotion?',
-          fullQuestion: 'What emotion is shown in this picture?',
-          correctAnswer: 'Happy',
-          options: ['Happy', 'Sad', 'Angry', 'Surprised'],
-          hint: 'Look at the smile and bright eyes!'
-        },
-        {
-          image: require('../../assets/images/Happ2_real.png'),
-          question: 'How happy?',
-          fullQuestion: 'Use the slider to rate how happy this person looks',
-          type: 'slider',
-          correctRange: [70, 100],
-          labels: ['😢', '😐', '😊'],
-          hint: 'Notice the big smile and joyful expression'
-        },
-        {
-          image: require('../../assets/images/Excited_real.png'),
-          question: 'What type of happiness?',
-          fullQuestion: 'What type of happy feeling is this?',
-          correctAnswer: 'Excited',
-          options: ['Calm', 'Excited', 'Tired', 'Bored'],
-          hint: 'Look at the energy in their expression'
-        },
+        require('../../assets/images/Happy_real.png'),
+        require('../../assets/images/Happ2_real.png'),
+        require('../../assets/images/Excited_real.png'),
+        require('../../assets/Images2/Asian Man/AM Happy.png'),
+        require('../../assets/Images2/Asian Woman/AW Happy.png'),
+        require('../../assets/Images2/Black Man/BM Happy.png'),
+        require('../../assets/Images2/Black Woman/BW Happy.png'),
+        require('../../assets/Images2/Caucasian Man/CM Happy.png'),
+        require('../../assets/Images2/Caucasian Woman/CW Happy.png'),
+        require('../../assets/Images2/Old Man/OM happy.png'),
+        require('../../assets/Images2/Old Woman/OW Happy.png'),
+        require('../../assets/Images2/South Asian Man/SAM Happy.png'),
+        require('../../assets/Images2/South Asian Woman/SAW Happy.png')
       ],
       sad: [
-        {
-          image: require('../../assets/images/TIred_real.png'),
-          question: 'What emotion?',
-          fullQuestion: 'What emotion do you see here?',
-          correctAnswer: 'Tired',
-          options: ['Happy', 'Tired', 'Angry', 'Surprised'],
-          hint: 'Notice the droopy eyes and low energy'
-        },
-        {
-          image: require('../../assets/images/Worried_real.png'),
-          question: 'How do they feel?',
-          fullQuestion: 'How does this person feel?',
-          correctAnswer: 'Worried',
-          options: ['Happy', 'Worried', 'Angry', 'Excited'],
-          hint: 'Look at the concerned expression'
-        },
+        require('../../assets/images/TIred_real.png'),
+        require('../../assets/images/Worried_real.png'),
+        require('../../assets/Images2/Asian Man/AM Sad.png'),
+        require('../../assets/Images2/Asian Woman/AW Sad.png'),
+        require('../../assets/Images2/Black Man/BM Sad.png'),
+        require('../../assets/Images2/Caucasian Man/CM Sad.png'),
+        require('../../assets/Images2/Caucasian Woman/CW Sad.png'),
+        require('../../assets/Images2/Old Man/OM sad.png'),
+        require('../../assets/Images2/Old Woman/OW sad.png'),
+        require('../../assets/Images2/South Asian Man/SAM Sad.png')
       ],
       angry: [
-        {
-          image: IMAGES.angry_female_1,
-          question: 'What emotion?',
-          fullQuestion: 'What emotion is displayed here?',
-          correctAnswer: 'Angry',
-          options: ['Happy', 'Sad', 'Angry', 'Tired'],
-          hint: 'Notice the frown and tense face muscles'
-        },
-        {
-          image: IMAGES.angry_female_2,
-          question: 'How angry?',
-          fullQuestion: 'Use the slider to rate how angry this person appears',
-          type: 'slider',
-          correctRange: [70, 100],
-          labels: ['😌', '😠', '🤬'],
-          hint: 'Look at the intensity of the angry expression'
-        },
-        {
-          image: IMAGES.angry_male_1,
-          question: 'Male anger?',
-          fullQuestion: 'What type of anger is this male showing?',
-          correctAnswer: 'Frustrated',
-          options: ['Calm', 'Frustrated', 'Happy', 'Confused'],
-          hint: 'Look at the facial tension and expression'
-        },
-        {
-          image: IMAGES.angry_male_2,
-          question: 'Anger level?',
-          fullQuestion: 'What level of anger do you see?',
-          correctAnswer: 'Moderate',
-          options: ['None', 'Mild', 'Moderate', 'Extreme'],
-          hint: 'Notice the controlled but tense expression'
-        },
-        {
-          image: IMAGES.angry_female_3,
-          question: 'Expression type?',
-          fullQuestion: 'What type of angry expression is this?',
-          correctAnswer: 'Irritated',
-          options: ['Pleasant', 'Irritated', 'Sleepy', 'Excited'],
-          hint: 'Look at the eyebrows and mouth position'
-        },
+        IMAGES.angry_female_1,
+        IMAGES.angry_female_2,
+        IMAGES.angry_male_1,
+        IMAGES.angry_male_2,
+        IMAGES.angry_female_3,
+        require('../../assets/Images2/Asian Man/AM Angry.png'),
+        require('../../assets/Images2/Asian Woman/AW Angry.png'),
+        require('../../assets/Images2/Black Man/BM Angry.png'),
+        require('../../assets/Images2/Black Woman/BW Angry.png'),
+        require('../../assets/Images2/Caucasian Man/CM Angry.png'),
+        require('../../assets/Images2/Caucasian Woman/CW ANgry.png'),
+        require('../../assets/Images2/Old Man/OM angry.png'),
+        require('../../assets/Images2/Old Woman/OW Angry.png'),
+        require('../../assets/Images2/South Asian Man/SAM Angry.png'),
+        require('../../assets/Images2/South Asian Woman/SAW angry.png')
       ],
       surprised: [
-        {
-          image: require('../../assets/images/Surprised_real.png'),
-          question: 'What emotion?',
-          fullQuestion: 'What emotion do you see in this face?',
-          correctAnswer: 'Surprised',
-          options: ['Excited', 'Worried', 'Happy', 'Surprised'],
-          hint: 'Look at the wide open eyes and mouth!'
-        },
-        {
-          image: require('../../assets/images/Surprised2_real.png'),
-          question: 'What kind of surprise?',
-          fullQuestion: 'What kind of surprise is this?',
-          correctAnswer: 'Shocked',
-          options: ['Pleasant Surprise', 'Shocked', 'Happy', 'Confused'],
-          hint: 'Notice the intensity of the surprised look'
-        },
+        require('../../assets/images/Surprised_real.png'),
+        require('../../assets/images/Surprised2_real.png'),
+        require('../../assets/Images2/Asian Man/AM Shocked.png'),
+        require('../../assets/Images2/Asian Woman/AW Shocked.png'),
+        require('../../assets/Images2/Black Man/BM Shocked.png'),
+        require('../../assets/Images2/Black Woman/BW Shocked.png'),
+        require('../../assets/Images2/Caucasian Man/CM Shocked.png'),
+        require('../../assets/Images2/Caucasian Woman/CW Shocked.png'),
+        require('../../assets/Images2/Old Woman/OW shocked.png'),
+        require('../../assets/Images2/South Asian Man/SAM shockede.png'),
+        require('../../assets/Images2/South Asian Woman/SAW shocked.png')
       ],
       mixed: [
-        {
-          image: require('../../assets/images/Happy_real.png'),
-          question: 'What emotion?',
-          fullQuestion: 'What emotion is shown in this picture?',
-          correctAnswer: 'Happy',
-          options: ['Happy', 'Sad', 'Angry', 'Surprised'],
-          hint: 'Look at the smile and bright eyes!'
-        },
-        {
-          image: require('../../assets/images/Disgusted_real.png'),
-          question: 'What feeling?',
-          fullQuestion: 'What feeling does this person show?',
-          correctAnswer: 'Disgusted',
-          options: ['Happy', 'Disgusted', 'Surprised', 'Tired'],
-          hint: 'Look at the facial expression showing dislike'
-        },
-        {
-          image: require('../../assets/images/Bored_real.png'),
-          question: 'How engaged?',
-          fullQuestion: 'How engaged does this person look?',
-          correctAnswer: 'Bored',
-          options: ['Very Interested', 'Bored', 'Excited', 'Happy'],
-          hint: 'Notice the lack of interest in their expression'
-        },
+        require('../../assets/images/Happy_real.png'),
+        require('../../assets/images/Disgusted_real.png'),
+        require('../../assets/images/Bored_real.png'),
+        require('../../assets/Images2/Asian Man/AM Happy.png'),
+        require('../../assets/Images2/Asian Woman/AW Sad.png'),
+        require('../../assets/Images2/Black Man/BM Angry.png'),
+        require('../../assets/Images2/Caucasian Woman/CW Shocked.png'),
+        require('../../assets/Images2/Old Man/OM happy.png'),
+        require('../../assets/Images2/South Asian Woman/SAW Happy.png')
       ]
     };
-    return allTasks[targetEmotion] || allTasks.mixed;
+
+    const emotionOptions = {
+      happy: ['Happy', 'Joyful', 'Excited', 'Content'],
+      sad: ['Sad', 'Tired', 'Worried', 'Disappointed'],
+      angry: ['Angry', 'Frustrated', 'Irritated', 'Mad'],
+      surprised: ['Surprised', 'Shocked', 'Amazed', 'Startled'],
+      mixed: ['Happy', 'Sad', 'Angry', 'Surprised', 'Disgusted', 'Bored']
+    };
+
+    const generateTasks = (emotion) => {
+      const images = baseImages[emotion] || baseImages.mixed;
+      const options = emotionOptions[emotion] || emotionOptions.mixed;
+      const tasks = [];
+      
+      // Use only unique images - limit to available images
+      const maxTasks = Math.min(15, images.length);
+      
+      for (let i = 0; i < maxTasks; i++) {
+        const isSlider = i % 5 === 2;
+        
+        if (isSlider) {
+          tasks.push({
+            image: images[i],
+            question: '📊',
+            fullQuestion: `Rate the ${emotion} intensity`,
+            type: 'slider',
+            correctRange: [60, 90],
+            labels: ['😢', '😐', '😊'],
+            hint: `Notice the ${emotion} expression`
+          });
+        } else {
+          const questionTypes = [
+            { q: '❓', full: 'What emotion is shown?' },
+            { q: '🎭', full: 'How does this person feel?' },
+            { q: '😊', full: 'What is their mood?' },
+            { q: '🤔', full: 'What emotion do you see?' }
+          ];
+          
+          const questionType = questionTypes[i % questionTypes.length];
+          const correctAnswer = options[i % options.length];
+          const wrongOptions = options.filter(opt => opt !== correctAnswer).slice(0, 3);
+          const allOptions = [correctAnswer, ...wrongOptions];
+          
+          tasks.push({
+            image: images[i],
+            question: questionType.q,
+            fullQuestion: questionType.full,
+            correctAnswer,
+            options: allOptions,
+            hint: `Look for signs of ${emotion}`
+          });
+        }
+      }
+      return tasks;
+    };
+
+    return generateTasks(targetEmotion);
   };
   
   const tasks = getTasksForEmotion(route.params?.emotion);
 
+  const showFeedbackAnimation = (isCorrect) => {
+    setShowFeedback(isCorrect);
+    Animated.sequence([
+      Animated.timing(feedbackAnimation, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.delay(1500),
+      Animated.timing(feedbackAnimation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      })
+    ]).start(() => setShowFeedback(null));
+  };
+
   const handleAnswerSelect = async (answer) => {
-    if (selectedAnswer !== null && !showSecondChance) return;
+    if (selectedAnswer) return;
     
     setSelectedAnswer(answer);
-    setAttempts(attempts + 1);
     
     if (answer === tasks[currentTask].correctAnswer) {
-      const feedback = ['Well done!', 'That\'s right!', 'Nice work!', 'Correct!', 'Great!'][Math.floor(Math.random() * 5)];
-      if (isTTSEnabled) await TTS.speakFeedback(feedback, true);
-      setShowSecondChance(false);
+      showFeedbackAnimation(true);
+      if (isTTSEnabled) await TTS.speakFeedback('Great!', true);
     } else {
-      if (attempts === 0) {
-        if (isTTSEnabled) await TTS.speakFeedback('Try again', false);
-        setShowHintMessage(true);
-        setShowSecondChance(true);
-        setTimeout(() => {
-          setSelectedAnswer(null);
-          setShowHintMessage(false);
-        }, 5000);
-      } else {
-        const feedback = ['Nice try', 'Keep trying', 'Almost there', 'Good effort'][Math.floor(Math.random() * 4)];
-        if (isTTSEnabled) await TTS.speakFeedback(feedback, false);
-        setShowSecondChance(false);
-      }
+      showFeedbackAnimation(false);
+      if (isTTSEnabled) await TTS.speakFeedback('Try again', false);
     }
   };
 
 
 
   const handleSliderSubmit = async () => {
-    if (selectedAnswer !== null && !showSecondChance) return;
+    if (selectedAnswer) return;
     
-    setAttempts(attempts + 1);
     const [min, max] = tasks[currentTask].correctRange;
     const isCorrect = sliderValue >= min && sliderValue <= max;
     
-    if (isCorrect) {
-      setSelectedAnswer('correct');
-      const feedback = ['Well done!', 'That\'s right!', 'Nice work!', 'Correct!', 'Great!'][Math.floor(Math.random() * 5)];
-      if (isTTSEnabled) await TTS.speakFeedback(feedback, true);
-      setShowSecondChance(false);
-    } else {
-      if (attempts === 0) {
-        if (isTTSEnabled) await TTS.speakFeedback('Try again', false);
-        setShowHintMessage(true);
-        setShowSecondChance(true);
-        setTimeout(() => {
-          setShowHintMessage(false);
-        }, 5000);
-      } else {
-        setSelectedAnswer('incorrect');
-        if (isTTSEnabled) await TTS.speakFeedback('Nice try', false);
-        setShowSecondChance(false);
-      }
+    setSelectedAnswer(isCorrect ? 'correct' : 'incorrect');
+    showFeedbackAnimation(isCorrect);
+    
+    if (isTTSEnabled) {
+      await TTS.speakFeedback(isCorrect ? 'Great!' : 'Try again', isCorrect);
     }
   };
 
@@ -240,9 +224,9 @@ export default function PictureEmotionActivity({ navigation, route }) {
       setSelectedAnswer(null);
       setSliderValue(50);
       setAttempts(0);
-      setShowSecondChance(false);
       setShowHintMessage(false);
       setShowHelpMessage(false);
+      setShowFeedback(null);
     } else {
       navigation.navigate('LessonSummary', { 
         score, 
@@ -266,7 +250,7 @@ export default function PictureEmotionActivity({ navigation, route }) {
         <View style={styles.content}>
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => setShowHintMessage(true)}>
-            <Image source={IMAGES.hint} style={styles.topBarIcon} />
+            <Image source={IMAGES.hint} resizeMode="contain" style={styles.topBarIcon} />
           </TouchableOpacity>
           
           <TouchableOpacity onPress={handleHome} style={styles.homeButton}>
@@ -274,7 +258,7 @@ export default function PictureEmotionActivity({ navigation, route }) {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => setShowHelpMessage(true)}>
-            <Image source={IMAGES.help} style={styles.topBarIcon} />
+            <Image source={IMAGES.help} resizeMode="contain" style={styles.topBarIcon} />
           </TouchableOpacity>
         </View>
 
@@ -307,6 +291,9 @@ export default function PictureEmotionActivity({ navigation, route }) {
         
         <View style={styles.imageContainer}>
           <Image source={tasks[currentTask].image} style={styles.questionImage} resizeMode="contain" />
+          {tasks[currentTask].isPlaceholder && (
+            <Text style={styles.placeholderText}>Placeholder Image</Text>
+          )}
           {showHintMessage && generateVisualCues(tasks[currentTask].hint).map((cue, index) => (
             <View key={index} style={getCueStyle(cue)} />
           ))}
@@ -318,12 +305,15 @@ export default function PictureEmotionActivity({ navigation, route }) {
               value={sliderValue}
               onValueChange={setSliderValue}
               labels={tasks[currentTask].labels}
-              disabled={selectedAnswer !== null && !showSecondChance}
+              minimumValue={0}
+              maximumValue={100}
+              step={5}
+              thumbStyle={{ width: 30, height: 30 }}
+              trackStyle={{ height: 8 }}
             />
             <TouchableOpacity
-              style={[styles.submitButton, (selectedAnswer !== null && !showSecondChance) && styles.disabledButton]}
+              style={styles.submitButton}
               onPress={handleSliderSubmit}
-              disabled={selectedAnswer !== null && !showSecondChance}
             >
               <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
@@ -339,7 +329,6 @@ export default function PictureEmotionActivity({ navigation, route }) {
                   selectedAnswer === option && option !== tasks[currentTask].correctAnswer && styles.incorrectOption,
                 ]}
                 onPress={() => handleAnswerSelect(option)}
-                disabled={selectedAnswer !== null && !showSecondChance}
               >
                 <View style={styles.optionContent}>
                   <Text style={styles.optionText}>{option}</Text>
@@ -350,14 +339,39 @@ export default function PictureEmotionActivity({ navigation, route }) {
         )}
 
         <TouchableOpacity
-          style={[styles.nextButton, (!selectedAnswer || showSecondChance) && styles.disabledButton]}
+          style={[styles.nextButton, !selectedAnswer && styles.disabledButton]}
           onPress={handleNext}
-          disabled={!selectedAnswer || showSecondChance}
+          disabled={!selectedAnswer}
         >
           <Text style={styles.nextButtonText}>
-            {currentTask === tasks.length - 1 ? 'Finish' : 'Next'}
+            {currentTask === tasks.length - 1 ? ' Finish' : ' Next'}
           </Text>
         </TouchableOpacity>
+
+        {/* Feedback Animation */}
+        {showFeedback !== null && (
+          <Animated.View 
+            style={[
+              styles.feedbackContainer,
+              {
+                opacity: feedbackAnimation,
+                transform: [{
+                  scale: feedbackAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.5, 1]
+                  })
+                }]
+              }
+            ]}
+          >
+            <Text style={styles.feedbackEmoji}>
+              {showFeedback ? '🎉' : '😔'}
+            </Text>
+            <Text style={styles.feedbackText}>
+              {showFeedback ? 'Great!' : 'Try Again'}
+            </Text>
+          </Animated.View>
+        )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -388,6 +402,7 @@ const styles = StyleSheet.create({
   title: { fontSize: SIZES.large, color: COLORS.black, marginBottom: 30, textAlign: 'center' },
   imageContainer: { width: 250, height: 250, backgroundColor: COLORS.white, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 30, alignSelf: 'center' },
   questionImage: { width: 230, height: 230, borderRadius: 15 },
+  placeholderText: { fontSize: 12, color: COLORS.grey, textAlign: 'center', marginTop: 5, position: 'absolute', bottom: 10 },
   optionsContainer: { width: '100%', maxWidth: 300, alignSelf: 'center' },
   optionButton: { backgroundColor: COLORS.lightBlue, borderRadius: SIZES.radius, paddingVertical: SIZES.padding, marginBottom: SIZES.margin, alignItems: 'center' },
   correctOption: { backgroundColor: '#4CAF50' },
@@ -402,6 +417,26 @@ const styles = StyleSheet.create({
   sliderContainer: { width: '100%', alignItems: 'center', marginBottom: 30 },
   submitButton: { backgroundColor: COLORS.orange, borderRadius: SIZES.radius, paddingVertical: SIZES.padding, paddingHorizontal: 40, marginTop: 20, ...SHADOWS.small },
   submitButtonText: { fontSize: SIZES.large, color: COLORS.white, fontWeight: 'bold' },
+  feedbackContainer: {
+    position: 'absolute',
+    top: '50%',
+    right: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 50,
+    padding: 15,
+    alignItems: 'center',
+    ...SHADOWS.medium,
+    zIndex: 1000,
+  },
+  feedbackEmoji: {
+    fontSize: 40,
+    marginBottom: 5,
+  },
+  feedbackText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.darkBlue,
+  },
 
 
 });

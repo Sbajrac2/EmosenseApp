@@ -1,134 +1,118 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, Animated, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, PanResponder, Animated, Image, TouchableOpacity, Dimensions } from 'react-native';
 import TTSToggle from '../components/TTSToggle';
 import { COLORS, SIZES, FONTS, SHADOWS } from '../constants/theme';
-import { IMAGES } from '../constants/images';
 import TTS from '../utils/textToSpeech';
 import { useTTS } from '../contexts/TTSContext';
 import { useRewards } from '../contexts/RewardContext';
 
+const { width } = Dimensions.get('window');
+
 export default function EmotionSortActivity({ navigation, route }) {
   const [currentCard, setCurrentCard] = useState(0);
   const [score, setScore] = useState(0);
-  const [draggedCard, setDraggedCard] = useState(null);
-  const [binFeedback, setBinFeedback] = useState({});
-  const [level, setLevel] = useState(1);
+  const [binFeedback, setBinFeedback] = useState('');
+  const pan = new Animated.ValueXY();
   const { isTTSEnabled } = useTTS();
-  const { awardBadge, incrementStreak } = useRewards();
+  const { awardBadge } = useRewards();
 
-  const level1Bins = [
-    { id: 'happy', label: 'Happy', color: COLORS.yellow },
-    { id: 'sad', label: 'Sad', color: COLORS.lightBlue },
-    { id: 'angry', label: 'Angry', color: '#FFB3B3' },
-    { id: 'surprised', label: 'Surprised', color: COLORS.pink }
+  const emotions = [
+    { image: require('../../assets/Images2/Asian Man/AM Happy.png'), type: 'positive' },
+    { image: require('../../assets/Images2/Black Woman/BW Angry.png'), type: 'negative' },
+    { image: require('../../assets/Images2/Caucasian Man/CM Sad.png'), type: 'negative' },
+    { image: require('../../assets/Images2/Old Woman/OW Happy.png'), type: 'positive' },
+    { image: require('../../assets/Images2/South Asian Man/SAM Angry.png'), type: 'negative' },
+    { image: require('../../assets/Images2/Asian Woman/AW Happy.png'), type: 'positive' },
+    { image: require('../../assets/Images2/Black Man/BM Sad.png'), type: 'negative' },
+    { image: require('../../assets/Images2/Caucasian Woman/CW Happy.png'), type: 'positive' },
+    { image: require('../../assets/Images2/Old Man/OM angry.png'), type: 'negative' },
+    { image: require('../../assets/Images2/South Asian Woman/SAW Happy.png'), type: 'positive' }
   ];
 
-  const level2Bins = [
-    { id: 'happy', label: 'Happy', color: COLORS.yellow },
-    { id: 'sad', label: 'Sad', color: COLORS.lightBlue },
-    { id: 'angry', label: 'Angry', color: '#FFB3B3' },
-    { id: 'bored', label: 'Bored', color: '#D3D3D3' },
-    { id: 'excited', label: 'Excited', color: '#FFD700' },
-    { id: 'worried', label: 'Worried', color: '#DDA0DD' }
-  ];
-
-  const bins = level === 1 ? level1Bins : level2Bins;
-
-  const level1Cards = [
-    { id: 1, image: require('../../assets/images/Happy.png'), emotion: 'happy' },
-    { id: 2, image: require('../../assets/images/Sad.png'), emotion: 'sad' },
-    { id: 3, image: IMAGES.angry_female_1, emotion: 'angry' },
-    { id: 4, image: require('../../assets/images/Surprised.png'), emotion: 'surprised' },
-    { id: 5, image: require('../../assets/images/Happy_real.png'), emotion: 'happy' },
-    { id: 6, image: require('../../assets/images/TIred_real.png'), emotion: 'sad' }
-  ];
-
-  const level2Cards = [
-    { id: 1, image: require('../../assets/images/Happy.png'), emotion: 'happy' },
-    { id: 2, image: require('../../assets/images/Sad.png'), emotion: 'sad' },
-    { id: 3, image: IMAGES.angry_female_1, emotion: 'angry' },
-    { id: 4, image: require('../../assets/images/Excited.png'), emotion: 'excited' },
-    { id: 5, image: require('../../assets/images/TIred_real.png'), emotion: 'bored' },
-    { id: 6, image: require('../../assets/images/Worried_real.png'), emotion: 'worried' },
-    { id: 7, image: require('../../assets/images/Happy_real.png'), emotion: 'happy' },
-    { id: 8, image: IMAGES.angry_male_1, emotion: 'angry' }
-  ];
-
-  const cards = level === 1 ? level1Cards : level2Cards;
-
-  const handleDrop = async (binId) => {
-    const currentCardData = cards[currentCard];
-    const isCorrect = currentCardData.emotion === binId;
-    
-    if (isCorrect) {
-      setScore(score + 1);
-      setBinFeedback({ [binId]: 'correct' });
-      if (isTTSEnabled) await TTS.speakFeedback('Great job!', true);
-      incrementStreak();
-    } else {
-      setBinFeedback({ [binId]: 'incorrect' });
-      if (isTTSEnabled) await TTS.speakFeedback('Try again', false);
-    }
-
-    setTimeout(async () => {
-      setBinFeedback({});
-      if (currentCard < cards.length - 1) {
-        setCurrentCard(currentCard + 1);
-      } else {
-        if (level === 1) {
-          setLevel(2);
-          setCurrentCard(0);
-          setScore(0);
-          if (isTTSEnabled) await TTS.speakFeedback('Great! Now try Level 2!', true);
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], { useNativeDriver: false }),
+    onPanResponderRelease: async (evt, gestureState) => {
+      if (Math.abs(gestureState.dx) > 100) {
+        const swipeDirection = gestureState.dx > 0 ? 'right' : 'left';
+        const correctSide = emotions[currentCard].type === 'positive' ? 'right' : 'left';
+        const isCorrect = swipeDirection === correctSide;
+        
+        if (isCorrect) {
+          setScore(score + 1);
+          setBinFeedback('correct');
+          if (isTTSEnabled) await TTS.speakFeedback('Good!', true);
         } else {
-          if (score >= 6) {
-            awardBadge('emotion_sorter', 'Emotion Sorter Master', 'Completed both levels!');
-          }
-          navigation.navigate('LessonSummary', {
-            score,
-            totalQuestions: cards.length,
-            lessonTitle: 'Emotion Sorting - Level 2',
-            source: route.params?.source || 'activities'
-          });
+          setBinFeedback('incorrect');
+          if (isTTSEnabled) await TTS.speakFeedback('Try again', false);
         }
-      }
-    }, 1500);
-  };
 
-  const getBinStyle = (binId) => {
-    const feedback = binFeedback[binId];
-    if (feedback === 'correct') {
-      return [styles.bin, { backgroundColor: '#4CAF50', transform: [{ scale: 1.1 }] }];
+        setTimeout(() => {
+          setBinFeedback('');
+          if (currentCard < emotions.length - 1) {
+            setCurrentCard(currentCard + 1);
+            pan.setValue({ x: 0, y: 0 });
+          } else {
+            if (score >= 8) {
+              awardBadge('emotion_sorter', 'Emotion Expert', 'Great at sorting emotions!');
+            }
+            navigation.navigate('LessonSummary', {
+              score: score + (isCorrect ? 1 : 0),
+              totalQuestions: emotions.length,
+              lessonTitle: 'Emotion Sorting',
+              source: route.params?.source || 'activities'
+            });
+          }
+        }, 1500);
+      } else {
+        Animated.spring(pan, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
+      }
+    },
+  });
+
+  const getBinStyle = (side) => {
+    if (binFeedback === 'correct') {
+      return emotions[currentCard].type === 'positive' && side === 'right' || 
+             emotions[currentCard].type === 'negative' && side === 'left'
+        ? [styles.bin, styles.correctBin] : styles.bin;
     }
-    if (feedback === 'incorrect') {
-      return [styles.bin, { backgroundColor: '#F44336', transform: [{ rotate: '5deg' }] }];
+    if (binFeedback === 'incorrect') {
+      return emotions[currentCard].type === 'positive' && side === 'left' || 
+             emotions[currentCard].type === 'negative' && side === 'right'
+        ? [styles.bin, styles.incorrectBin] : styles.bin;
     }
-    return [styles.bin, { backgroundColor: bins.find(b => b.id === binId)?.color }];
+    return styles.bin;
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <TTSToggle />
       <View style={styles.content}>
-        <Text style={styles.progress}>Level {level} - Card {currentCard + 1} of {cards.length}</Text>
-        <Text style={styles.title}>Drag the face to the right feeling</Text>
-        {/* {level === 2 && <Text style={styles.subtitle}>More emotions to choose from!</Text>} */}
-
-        <View style={styles.cardContainer}>
-          <Image source={cards[currentCard].image} style={styles.card} resizeMode="contain" />
-        </View>
+        {/* SKIP BUTTON - Comment this line to remove: */}
+        <TouchableOpacity style={styles.skipButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.skipText}>Skip</Text>
+        </TouchableOpacity>
+        
+        <Text style={styles.progress}>Card {currentCard + 1} of {emotions.length}</Text>
+        <Text style={styles.title}>Sort the Emotions</Text>
 
         <View style={styles.binsContainer}>
-          {bins.map(bin => (
-            <TouchableOpacity
-              key={bin.id}
-              style={getBinStyle(bin.id)}
-              onPress={() => handleDrop(bin.id)}
-            >
-              <Text style={styles.binLabel}>{bin.label}</Text>
-            </TouchableOpacity>
-          ))}
+          <View style={getBinStyle('left')}>
+            <Text style={styles.binLabel}>😢 Negative</Text>
+          </View>
+          <View style={getBinStyle('right')}>
+            <Text style={styles.binLabel}>😊 Positive</Text>
+          </View>
         </View>
+
+        <Animated.View
+          style={[styles.emotionCard, { transform: [{ translateX: pan.x }, { translateY: pan.y }] }]}
+          {...panResponder.panHandlers}
+        >
+          <Image source={emotions[currentCard].image} style={styles.emotionImage} resizeMode="contain" />
+        </Animated.View>
+
+        <Text style={styles.instruction}>Swipe left or right</Text>
       </View>
     </SafeAreaView>
   );
@@ -138,21 +122,15 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.lightGreen },
   content: { flex: 1, padding: SIZES.padding, alignItems: 'center' },
   progress: { fontSize: SIZES.base, color: COLORS.grey, marginBottom: 10 },
-  title: { fontSize: SIZES.large, color: COLORS.black, textAlign: 'center', marginBottom: 10, ...FONTS.bold },
-  subtitle: { fontSize: SIZES.base, color: COLORS.darkBlue, textAlign: 'center', marginBottom: 20 },
-  cardContainer: { marginBottom: 40 },
-  card: { width: 150, height: 150, borderRadius: 15, ...SHADOWS.medium },
-  binsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', width: '100%' },
-  bin: {
-    width: 120,
-    height: 80,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 10,
-    borderWidth: 3,
-    borderColor: COLORS.darkBlue,
-    ...SHADOWS.small
-  },
-  binLabel: { fontSize: SIZES.large, color: COLORS.black, ...FONTS.bold }
+  title: { fontSize: SIZES.h2, color: COLORS.black, textAlign: 'center', marginBottom: 30, ...FONTS.bold },
+  binsContainer: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 40 },
+  bin: { width: 140, height: 80, borderRadius: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.white, ...SHADOWS.medium },
+  correctBin: { backgroundColor: '#4CAF50', transform: [{ scale: 1.1 }] },
+  incorrectBin: { backgroundColor: '#F44336', transform: [{ scale: 0.9 }] },
+  binLabel: { fontSize: SIZES.large, color: COLORS.black, textAlign: 'center', ...FONTS.bold },
+  emotionCard: { width: 200, height: 250, backgroundColor: COLORS.white, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 30, ...SHADOWS.medium },
+  emotionImage: { width: 150, height: 150 },
+  instruction: { fontSize: SIZES.base, color: COLORS.grey, textAlign: 'center' },
+  skipButton: { position: 'absolute', right: 20, top: 10, backgroundColor: COLORS.orange, paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20, zIndex: 100 },
+  skipText: { color: COLORS.white, fontWeight: 'bold', fontSize: 14 }
 });

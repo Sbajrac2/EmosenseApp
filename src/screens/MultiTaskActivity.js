@@ -11,26 +11,26 @@ export default function MultiTaskActivity({ navigation }) {
     {
       type: 'picture',
       title: 'Task 1: Identify Emotion in Picture',
-      image: require('../../assets/images/3.png'),
+      image: require('../../assets/images/Happy_real.png'),
+      question: 'What emotion is shown?',
+      options: ['Happy', 'Angry', 'Sad'],
+      correctAnswer: 'Happy'
+    },
+    {
+      type: 'picture',
+      title: 'Task 2: Identify Emotion in Picture',
+      image: require('../../assets/images/Angry_real.png'),
       question: 'What emotion is shown?',
       options: ['Happy', 'Angry', 'Sad'],
       correctAnswer: 'Angry'
     },
     {
-      type: 'emoji_match',
-      title: 'Task 2: Match Emoji with Word',
-      emoji: '😊',
-      question: 'Which word matches this emoji?',
-      options: ['Sad', 'Happy', 'Angry'],
-      correctAnswer: 'Happy'
-    },
-    {
-      type: 'scenario',
-      title: 'Task 3: Choose Emotion for Scenario',
-      scenario: 'Your friend gave you a surprise birthday party',
-      question: 'How would you feel?',
-      options: ['Happy', 'Sad', 'Angry'],
-      correctAnswer: 'Happy'
+      type: 'picture',
+      title: 'Task 3: Identify Emotion in Picture',
+      image: require('../../assets/images/Sad.png'),
+      question: 'What emotion is shown?',
+      options: ['Happy', 'Angry', 'Sad'],
+      correctAnswer: 'Sad'
     }
   ];
 
@@ -66,18 +66,6 @@ export default function MultiTaskActivity({ navigation }) {
         {task.type === 'picture' && (
           <View style={styles.imageContainer}>
             <Image source={task.image} style={styles.taskImage} resizeMode="contain" />
-          </View>
-        )}
-
-        {task.type === 'emoji_match' && (
-          <View style={styles.emojiContainer}>
-            <Text style={styles.emoji}>{task.emoji}</Text>
-          </View>
-        )}
-
-        {task.type === 'scenario' && (
-          <View style={styles.scenarioContainer}>
-            <Text style={styles.scenarioText}>{task.scenario}</Text>
           </View>
         )}
 

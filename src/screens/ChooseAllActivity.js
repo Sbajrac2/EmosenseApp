@@ -20,12 +20,12 @@ export default function ChooseAllActivity({ navigation, route }) {
       title: 'Choose all happy faces',
       targetEmotion: 'happy',
       cards: [
-        { id: 1, image: require('../../assets/images/Happy.png'), emotion: 'happy', isCorrect: true },
-        { id: 2, image: require('../../assets/images/Sad.png'), emotion: 'sad', isCorrect: false },
-        { id: 3, image: require('../../assets/images/Excited.png'), emotion: 'happy', isCorrect: true },
-        { id: 4, image: require('../../assets/images/Angry_real.png'), emotion: 'angry', isCorrect: false },
-        { id: 5, image: require('../../assets/images/Happy_real.png'), emotion: 'happy', isCorrect: true },
-        { id: 6, image: require('../../assets/images/Disgusted_real.png'), emotion: 'disgusted', isCorrect: false }
+        { id: 1, image: require('../../assets/Images2/Asian Man/AM Happy.png'), emotion: 'happy', isCorrect: true },
+        { id: 2, image: require('../../assets/Images2/Black Woman/BW Angry.png'), emotion: 'angry', isCorrect: false },
+        { id: 3, image: require('../../assets/Images2/Caucasian Woman/CW Happy.png'), emotion: 'happy', isCorrect: true },
+        { id: 4, image: require('../../assets/Images2/Old Man/OM sad.png'), emotion: 'sad', isCorrect: false },
+        { id: 5, image: require('../../assets/Images2/South Asian Woman/SAW Happy.png'), emotion: 'happy', isCorrect: true },
+        { id: 6, image: require('../../assets/Images2/Black Man/BM Sad.png'), emotion: 'sad', isCorrect: false }
       ],
       hint: 'Look for smiles and bright expressions'
     },
@@ -33,12 +33,12 @@ export default function ChooseAllActivity({ navigation, route }) {
       title: 'Choose all sad faces',
       targetEmotion: 'sad',
       cards: [
-        { id: 1, image: require('../../assets/images/Sad.png'), emotion: 'sad', isCorrect: true },
-        { id: 2, image: require('../../assets/images/Happy.png'), emotion: 'happy', isCorrect: false },
-        { id: 3, image: require('../../assets/images/TIred_real.png'), emotion: 'sad', isCorrect: true },
-        { id: 4, image: require('../../assets/images/Worried_real.png'), emotion: 'sad', isCorrect: true },
-        { id: 5, image: require('../../assets/images/Excited.png'), emotion: 'happy', isCorrect: false },
-        { id: 6, image: IMAGES.angry_female_1, emotion: 'angry', isCorrect: false }
+        { id: 1, image: require('../../assets/Images2/Asian Woman/AW Sad.png'), emotion: 'sad', isCorrect: true },
+        { id: 2, image: require('../../assets/Images2/Caucasian Man/CM Happy.png'), emotion: 'happy', isCorrect: false },
+        { id: 3, image: require('../../assets/Images2/Old Woman/OW sad.png'), emotion: 'sad', isCorrect: true },
+        { id: 4, image: require('../../assets/Images2/South Asian Man/SAM Angry.png'), emotion: 'angry', isCorrect: false },
+        { id: 5, image: require('../../assets/Images2/Black Man/BM Happy.png'), emotion: 'happy', isCorrect: false },
+        { id: 6, image: require('../../assets/Images2/Caucasian Woman/CW Sad.png'), emotion: 'sad', isCorrect: true }
       ],
       hint: 'Notice downward expressions and droopy eyes'
     },
@@ -46,14 +46,53 @@ export default function ChooseAllActivity({ navigation, route }) {
       title: 'Choose all angry faces',
       targetEmotion: 'angry',
       cards: [
-        { id: 1, image: IMAGES.angry_female_1, emotion: 'angry', isCorrect: true },
-        { id: 2, image: require('../../assets/images/Happy.png'), emotion: 'happy', isCorrect: false },
-        { id: 3, image: IMAGES.angry_male_1, emotion: 'angry', isCorrect: true },
-        { id: 4, image: require('../../assets/images/Sad.png'), emotion: 'sad', isCorrect: false },
-        { id: 5, image: IMAGES.angry_female_2, emotion: 'angry', isCorrect: true },
-        { id: 6, image: require('../../assets/images/Surprised_real.png'), emotion: 'surprised', isCorrect: false }
+        { id: 1, image: require('../../assets/Images2/Caucasian Woman/CW ANgry.png'), emotion: 'angry', isCorrect: true },
+        { id: 2, image: require('../../assets/Images2/Old Woman/OW Happy.png'), emotion: 'happy', isCorrect: false },
+        { id: 3, image: require('../../assets/Images2/South Asian Man/SAM Angry.png'), emotion: 'angry', isCorrect: true },
+        { id: 4, image: require('../../assets/Images2/Asian Woman/AW Happy.png'), emotion: 'happy', isCorrect: false },
+        { id: 5, image: require('../../assets/Images2/Black Woman/BW Angry.png'), emotion: 'angry', isCorrect: true },
+        { id: 6, image: require('../../assets/Images2/Caucasian Man/CM Sad.png'), emotion: 'sad', isCorrect: false }
       ],
       hint: 'Look for frowns and tense facial muscles'
+    },
+    {
+      title: 'Choose all shocked faces',
+      targetEmotion: 'shocked',
+      cards: [
+        { id: 1, image: require('../../assets/Images2/Black Woman/BW Happy.png'), emotion: 'happy', isCorrect: false },
+        { id: 2, image: require('../../assets/Images2/Asian Man/AM Shocked.png'), emotion: 'shocked', isCorrect: true },
+        { id: 3, image: require('../../assets/Images2/Old Woman/OW shocked.png'), emotion: 'shocked', isCorrect: true },
+        { id: 4, image: require('../../assets/Images2/Caucasian Man/CM Angry.png'), emotion: 'angry', isCorrect: false },
+        { id: 5, image: require('../../assets/Images2/South Asian Woman/SAW shocked.png'), emotion: 'shocked', isCorrect: true },
+        { id: 6, image: require('../../assets/Images2/Asian Woman/AW Sad.png'), emotion: 'sad', isCorrect: false }
+      ],
+      hint: 'Look for wide eyes and open mouths'
+    },
+    {
+      title: 'Choose all crying faces',
+      targetEmotion: 'crying',
+      cards: [
+        { id: 1, image: require('../../assets/Images2/Asian Man/AM Crying.png'), emotion: 'crying', isCorrect: true },
+        { id: 2, image: require('../../assets/Images2/Black Man/BM Happy.png'), emotion: 'happy', isCorrect: false },
+        { id: 3, image: require('../../assets/Images2/Old Woman/OW Angry.png'), emotion: 'angry', isCorrect: false },
+        { id: 4, image: require('../../assets/Images2/Caucasian Woman/CW Crying.png'), emotion: 'crying', isCorrect: true },
+        { id: 5, image: require('../../assets/Images2/South Asian Woman/SAW cry.png.png'), emotion: 'crying', isCorrect: true },
+        { id: 6, image: require('../../assets/Images2/Asian Woman/AW Happy.png'), emotion: 'happy', isCorrect: false }
+      ],
+      hint: 'Look for tears and very sad expressions'
+    },
+    {
+      title: 'Choose all positive emotions',
+      targetEmotion: 'positive',
+      cards: [
+        { id: 1, image: require('../../assets/Images2/Asian Man/AM Crying.png'), emotion: 'crying', isCorrect: false },
+        { id: 2, image: require('../../assets/Images2/Black Woman/BW Happy.png'), emotion: 'happy', isCorrect: true },
+        { id: 3, image: require('../../assets/Images2/Old Man/OM happy.png'), emotion: 'happy', isCorrect: true },
+        { id: 4, image: require('../../assets/Images2/Caucasian Woman/CW ANgry.png'), emotion: 'angry', isCorrect: false },
+        { id: 5, image: require('../../assets/Images2/South Asian Man/SAM Happy.png'), emotion: 'happy', isCorrect: true },
+        { id: 6, image: require('../../assets/Images2/Black Man/BM Sad.png'), emotion: 'sad', isCorrect: false }
+      ],
+      hint: 'Look for happy and pleasant expressions'
     }
   ];
 
@@ -80,9 +119,9 @@ export default function ChooseAllActivity({ navigation, route }) {
     
     if (isAllCorrect) {
       setScore(score + 1);
-      if (isTTSEnabled) await TTS.speakFeedback('Excellent! You found all the correct faces!', true);
+      if (isTTSEnabled) await TTS.speakFeedback('Perfect!', true);
     } else {
-      if (isTTSEnabled) await TTS.speakFeedback('Not quite right. Look at the highlighted faces', false);
+      if (isTTSEnabled) await TTS.speakFeedback('Try again', false);
       setShowHint(true);
     }
   };
@@ -123,6 +162,11 @@ export default function ChooseAllActivity({ navigation, route }) {
       <TTSToggle />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
+          {/* SKIP BUTTON - Comment this line to remove: */}
+          <TouchableOpacity style={styles.skipButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.skipText}>Skip</Text>
+          </TouchableOpacity>
+          
           <Text style={styles.progress}>Task {currentTask + 1} of {tasks.length}</Text>
           
           <View style={styles.titleContainer}>
@@ -247,5 +291,7 @@ const styles = StyleSheet.create({
     fontSize: SIZES.large,
     color: COLORS.white,
     ...FONTS.bold
-  }
+  },
+  skipButton: { position: 'absolute', right: 20, top: 10, backgroundColor: COLORS.grey, paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
+  skipText: { color: COLORS.white, fontWeight: 'bold', fontSize: 12 }
 });

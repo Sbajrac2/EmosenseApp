@@ -11,22 +11,16 @@
       "resizeMode": "contain",
       "backgroundColor": "#E8F5E8"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.emosense"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#E8F5E8"
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.anonymous.emosense" },
+    "android": { "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#E8F5E8" } },
+    "web": { 
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "build": {
+        "output": "web-build"
       }
     },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
-    }
+    "sdkVersion": "52.0.0"
   }
 }

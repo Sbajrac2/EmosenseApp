@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+git remote add origin https://github.com/Sbajrac2/EmosenseApp.gitimport React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, ScrollView } from 'react-native';
 import TTSToggle from '../components/TTSToggle';
+import HomeButton from '../components/HomeButton';
 import { COLORS, SIZES, FONTS, SHADOWS } from '../constants/theme';
 import { IMAGES } from '../constants/images';
 import TTS from '../utils/textToSpeech';
@@ -12,86 +13,227 @@ export default function EmotionStoryActivity({ navigation, route }) {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [attempts, setAttempts] = useState(0);
   const { isTTSEnabled } = useTTS();
   const { awardBadge } = useRewards();
+  
+  const taskNumber = route.params?.taskNumber || 1;
+
+  // Clean up when leaving the screen
+  useEffect(() => {
+    return () => {
+      // Stop TTS when leaving the screen
+      TTS.stop();
+    };
+  }, []);
+
+  const handleGoHome = () => {
+    TTS.stop();
+    navigation.navigate('LessonsMain');
+  };
 
   const stories = [
     {
       panels: [
-        { image: require('../../assets/images/Happy.png'), text: "Sam gets a present" },
-        { image: require('../../assets/images/Excited.png'), text: "Sam opens it" },
-        { text: "How does Sam feel?" }
+        { image: require('../../assets/story/sam_get_present.png'), text: "Sam gets a present" },
+        { image: require('../../assets/story/sam_excited.png'), text: "Sam is excited" }
       ],
+      question: "How does Sam feel?",
       options: [
-        { image: require('../../assets/images/Happy.png'), emotion: 'Happy', correct: true },
-        { image: require('../../assets/images/Sad.png'), emotion: 'Sad', correct: false },
-        { image: IMAGES.angry_female_1, emotion: 'Angry', correct: false }
-      ],
-      hint: "Think about how you feel when you get a nice surprise"
+        { image: require('../../assets/story/sam_happy.png'), emotion: 'Happy', correct: true },
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Sad', correct: false },
+        { image: require('../../assets/story/sam_angry.png'), emotion: 'Angry', correct: false }
+      ]
     },
     {
       panels: [
-        { image: require('../../assets/images/Happy.png'), text: "Maya is playing" },
-        { image: require('../../assets/images/Sad.png'), text: "Her toy breaks" },
-        { text: "How does Maya feel?" }
+        { image: require('../../assets/story/sam_present.png'), text: "Sam opens present" },
+        { image: require('../../assets/story/sam_like_present.png'), text: "It's his favorite toy" }
       ],
+      question: "How does Sam feel?",
       options: [
-        { image: require('../../assets/images/Happy.png'), emotion: 'Happy', correct: false },
-        { image: require('../../assets/images/Sad.png'), emotion: 'Sad', correct: true },
-        { image: require('../../assets/images/Surprised.png'), emotion: 'Surprised', correct: false }
-      ],
-      hint: "Look at what happened to her toy"
+        { image: require('../../assets/story/sam_excited.png'), emotion: 'Excited', correct: true },
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Sad', correct: false },
+        { image: require('../../assets/story/sam_angry.png'), emotion: 'Angry', correct: false }
+      ]
     },
     {
       panels: [
-        { image: require('../../assets/images/Happy.png'), text: "Alex sees a spider" },
-        { image: require('../../assets/images/Surprised.png'), text: "It jumps at him" },
-        { text: "How does Alex feel?" }
+        { image: require('../../assets/story/sam_play.png'), text: "Sam plays with toy" },
+        { image: require('../../assets/story/sam_toy_break.png'), text: "The toy breaks" }
       ],
+      question: "How does Sam feel?",
       options: [
-        { image: require('../../assets/images/Happy.png'), emotion: 'Happy', correct: false },
-        { image: require('../../assets/images/Surprised.png'), emotion: 'Surprised', correct: true },
-        { image: require('../../assets/images/Sad.png'), emotion: 'Sad', correct: false }
-      ],
-      hint: "Think about sudden, unexpected things"
+        { image: require('../../assets/story/sam_happy.png'), emotion: 'Happy', correct: false },
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Sad', correct: true },
+        { image: require('../../assets/story/sam_surprised.png'), emotion: 'Surprised', correct: false }
+      ]
     },
     {
       panels: [
-        { image: require('../../assets/images/Happy.png'), text: "Lily is waiting" },
-        { image: require('../../assets/images/Worried_real.png'), text: "Her friend is very late" },
-        { text: "How does Lily feel?" }
+        { image: require('../../assets/story/sam_meet_alec.png'), text: "Sam meets Alex" },
+        { image: require('../../assets/story/alex_sam_play.png'), text: "They become friends" }
       ],
+      question: "How does Sam feel?",
       options: [
-        { image: require('../../assets/images/Happy.png'), emotion: 'Happy', correct: false },
-        { image: require('../../assets/images/Worried_real.png'), emotion: 'Worried', correct: true },
-        { image: IMAGES.angry_female_1, emotion: 'Angry', correct: false }
-      ],
-      hint: "Think about waiting and not knowing what happened"
+        { image: require('../../assets/story/sam_happy.png'), emotion: 'Happy', correct: true },
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Sad', correct: false },
+        { image: require('../../assets/story/sam_angry.png'), emotion: 'Angry', correct: false }
+      ]
     },
     {
       panels: [
-        { image: require('../../assets/images/Happy.png'), text: "Ben is told 'no'" },
-        { image: IMAGES.angry_male_1, text: "He can't have ice cream" },
-        { text: "How does Ben feel?" }
+        { image: require('../../assets/story/alex_sam_present.png'), text: "Alex gives Sam present" },
+        { image: require('../../assets/story/alex_present.png'), text: "Sam opens it" }
       ],
+      question: "How does Alex feel?",
       options: [
-        { image: require('../../assets/images/Happy.png'), emotion: 'Happy', correct: false },
-        { image: IMAGES.angry_male_1, emotion: 'Angry', correct: true },
-        { image: require('../../assets/images/Surprised.png'), emotion: 'Surprised', correct: false }
+        { image: require('../../assets/story/alex_happy.png'), emotion: 'Happy', correct: true },
+        { image: require('../../assets/story/alex_sad.png'), emotion: 'Sad', correct: false },
+        { image: require('../../assets/story/alex_worried.png'), emotion: 'Worried', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/alex_snacks.png'), text: "Alex shares snacks" },
+        { image: require('../../assets/story/sam_thanks.png'), text: "Sam says thank you" }
       ],
-      hint: "Think about not getting what you want"
+      question: "How does Alex feel?",
+      options: [
+        { image: require('../../assets/story/alex_happy.png'), emotion: 'Happy', correct: true },
+        { image: require('../../assets/story/alex_worried.png'), emotion: 'Worried', correct: false },
+        { image: require('../../assets/story/alex_sad.png'), emotion: 'Sad', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/alex_sam_play.png'), text: "Sam and Alex play" },
+        { image: require('../../assets/story/ball_hit_sam.png'), text: "Ball hits Sam" }
+      ],
+      question: "How does Sam feel?",
+      options: [
+        { image: require('../../assets/story/sam_happy.png'), emotion: 'Happy', correct: false },
+        { image: require('../../assets/story/sam_surprised.png'), emotion: 'Surprised', correct: true },
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Sad', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/alex_worried.png'), text: "Alex feels bad" },
+        { image: require('../../assets/story/sam_itsok.png'), text: "Sam says it's okay" }
+      ],
+      question: "How does Alex feel?",
+      options: [
+        { image: require('../../assets/story/alex_happy.png'), emotion: 'Happy', correct: true },
+        { image: require('../../assets/story/alex_worried.png'), emotion: 'Worried', correct: false },
+        { image: require('../../assets/story/alex_sad.png'), emotion: 'Sad', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/meet_maya.png'), text: "Sam meets Maya" },
+        { image: require('../../assets/story/meet_mayaa.png'), text: "Maya joins them" }
+      ],
+      question: "How does Sam feel?",
+      options: [
+        { image: require('../../assets/story/sam_happy.png'), emotion: 'Happy', correct: true },
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Sad', correct: false },
+        { image: require('../../assets/story/sam_angry.png'), emotion: 'Angry', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/maya_trick.png'), text: "Maya shows magic trick" },
+        { image: require('../../assets/story/sam_surprise.png'), text: "Sam is amazed" }
+      ],
+      question: "How does Sam feel?",
+      options: [
+        { image: require('../../assets/story/sam_surprised.png'), emotion: 'Surprised', correct: true },
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Sad', correct: false },
+        { image: require('../../assets/story/sam_angry.png'), emotion: 'Angry', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/sam_trick.png'), text: "Alex tries trick" },
+        { image: require('../../assets/story/alex_sad.png'), text: "It doesn't work" }
+      ],
+      question: "How does Alex feel?",
+      options: [
+        { image: require('../../assets/story/alex_happy.png'), emotion: 'Happy', correct: false },
+        { image: require('../../assets/story/alex_sad.png'), emotion: 'Sad', correct: true },
+        { image: require('../../assets/story/alex_worried.png'), emotion: 'Worried', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/maya_teach_alex.png'), text: "Maya teaches Alex" },
+        { image: require('../../assets/story/alex_happy.png'), text: "Alex learns trick" }
+      ],
+      question: "How does Alex feel?",
+      options: [
+        { image: require('../../assets/story/alex_happy.png'), emotion: 'Happy', correct: true },
+        { image: require('../../assets/story/alex_sad.png'), emotion: 'Sad', correct: false },
+        { image: require('../../assets/story/alex_worried.png'), emotion: 'Worried', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/going-home.png'), text: "Time to go home" },
+        { image: require('../../assets/story/saying bye.png'), text: "Friends say goodbye" }
+      ],
+      question: "How does Sam feel?",
+      options: [
+        { image: require('../../assets/story/sam_happy.png'), emotion: 'Happy', correct: false },
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Sad', correct: true },
+        { image: require('../../assets/story/sam_angry.png'), emotion: 'Angry', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/walking-home.png'), text: "Sam walks home" },
+        { image: require('../../assets/story/thinking.png'), text: "Will friends remember?" }
+      ],
+      question: "How does Sam feel?",
+      options: [
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Worried', correct: true },
+        { image: require('../../assets/story/sam_happy.png'), emotion: 'Happy', correct: false },
+        { image: require('../../assets/story/sam_surprised.png'), emotion: 'Surprised', correct: false }
+      ]
+    },
+    {
+      panels: [
+        { image: require('../../assets/story/reach_home.png'), text: "Sam reaches home" },
+        { image: require('../../assets/story/sam-tired.png'), text: "Long fun day" }
+      ],
+      question: "How does Sam feel?",
+      options: [
+        { image: require('../../assets/story/sam-tired.png'), emotion: 'Tired', correct: true },
+        { image: require('../../assets/story/sam_sad.png'), emotion: 'Sad', correct: false },
+        { image: require('../../assets/story/sam_happy.png'), emotion: 'Happy', correct: false }
+      ]
     }
   ];
 
   const handleAnswerSelect = async (option) => {
+    if (showFeedback) return;
+    
     setSelectedAnswer(option);
-    setShowFeedback(true);
     
     if (option.correct) {
       setScore(score + 1);
-      if (isTTSEnabled) await TTS.speakFeedback('Perfect! You understand the story!', true);
+      setShowFeedback(true);
+      if (isTTSEnabled) await TTS.speakFeedback('Good!', true);
     } else {
-      if (isTTSEnabled) await TTS.speakFeedback(stories[currentStory].hint, false);
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      if (isTTSEnabled) await TTS.speakFeedback('Try again', false);
+      
+      if (newAttempts < 2) {
+        setTimeout(() => setSelectedAnswer(null), 1500);
+      } else {
+        setShowFeedback(true);
+      }
     }
   };
 
@@ -100,14 +242,15 @@ export default function EmotionStoryActivity({ navigation, route }) {
       setCurrentStory(currentStory + 1);
       setSelectedAnswer(null);
       setShowFeedback(false);
+      setAttempts(0);
     } else {
-      if (score >= stories.length - 1) {
+      if (score >= Math.floor(stories.length * 0.7)) {
         awardBadge('story_teller', 'Story Expert', 'Understood emotion stories!');
       }
       navigation.navigate('LessonSummary', {
         score,
         totalQuestions: stories.length,
-        lessonTitle: 'Emotion Stories',
+        lessonTitle: `Emotion Stories - Task ${taskNumber}`,
         source: route.params?.source || 'activities'
       });
     }
@@ -118,19 +261,25 @@ export default function EmotionStoryActivity({ navigation, route }) {
   return (
     <SafeAreaView style={styles.container}>
       <TTSToggle />
+      <HomeButton onPress={handleGoHome} />
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
           <Text style={styles.progress}>Story {currentStory + 1} of {stories.length}</Text>
-          <Text style={styles.title}>Pick the ending that matches how they would feel</Text>
+        {/* SKIP BUTTON - Comment this line to remove: */}
+        <TouchableOpacity style={styles.skipButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.skipText}>Skip</Text>
+        </TouchableOpacity>
 
           <View style={styles.storyContainer}>
             {currentStoryData.panels.map((panel, index) => (
               <View key={index} style={styles.panel}>
-                {panel.image && <Image source={panel.image} style={styles.panelImage} resizeMode="contain" />}
+                <Image source={panel.image} style={styles.panelImage} resizeMode="contain" />
                 <Text style={styles.panelText}>{panel.text}</Text>
               </View>
             ))}
           </View>
+
+          <Text style={styles.question}>{currentStoryData.question}</Text>
 
           <View style={styles.optionsContainer}>
             {currentStoryData.options.map((option, index) => (
@@ -139,10 +288,10 @@ export default function EmotionStoryActivity({ navigation, route }) {
                 style={[
                   styles.optionButton,
                   showFeedback && option.correct && styles.correctOption,
-                  showFeedback && selectedAnswer === option && !option.correct && styles.incorrectOption
+                  selectedAnswer === option && !option.correct && styles.incorrectOption
                 ]}
                 onPress={() => handleAnswerSelect(option)}
-                disabled={showFeedback}
+                disabled={showFeedback || (selectedAnswer && selectedAnswer !== option)}
               >
                 <Image source={option.image} style={styles.optionImage} resizeMode="contain" />
                 <Text style={styles.optionText}>{option.emotion}</Text>
@@ -167,18 +316,20 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.lightGreen },
   scrollView: { flex: 1 },
   content: { padding: SIZES.padding, alignItems: 'center' },
-  progress: { fontSize: SIZES.base, color: COLORS.grey, marginBottom: 10 },
-  title: { fontSize: SIZES.large, color: COLORS.black, textAlign: 'center', marginBottom: 20, ...FONTS.bold },
-  storyContainer: { flexDirection: 'row', marginBottom: 30, flexWrap: 'wrap', justifyContent: 'center' },
-  panel: { width: 140, margin: 8, alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 15, padding: 15, ...SHADOWS.small },
-  panelImage: { width: 90, height: 90, marginBottom: 8 },
+  progress: { fontSize: SIZES.base, color: COLORS.grey, marginBottom: 20 },
+  storyContainer: { flexDirection: 'row', marginBottom: 25, justifyContent: 'center' },
+  panel: { width: 150, margin: 10, alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 15, padding: 15, ...SHADOWS.small },
+  panelImage: { width: 100, height: 100, marginBottom: 10 },
   panelText: { fontSize: SIZES.base, textAlign: 'center', color: COLORS.black, ...FONTS.medium },
-  optionsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
-  optionButton: { width: 130, margin: 12, alignItems: 'center', backgroundColor: COLORS.lightBlue, borderRadius: 20, padding: 20, ...SHADOWS.small },
-  correctOption: { backgroundColor: '#4CAF50', borderWidth: 3, borderColor: '#2E7D32' },
-  incorrectOption: { backgroundColor: '#F44336', borderWidth: 3, borderColor: '#C62828' },
-  optionImage: { width: 80, height: 80, marginBottom: 8 },
-  optionText: { fontSize: SIZES.large, color: COLORS.black, ...FONTS.bold },
-  nextButton: { backgroundColor: COLORS.orange, borderRadius: SIZES.radius, paddingVertical: SIZES.padding, paddingHorizontal: 40, marginTop: 20, ...SHADOWS.small },
-  nextButtonText: { fontSize: SIZES.large, color: COLORS.white, ...FONTS.bold }
+  question: { fontSize: SIZES.h2, color: COLORS.black, textAlign: 'center', marginBottom: 25, ...FONTS.bold },
+  optionsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 10 },
+  optionButton: { width: 110, margin: 8, alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 15, padding: 15, ...SHADOWS.small },
+  correctOption: { backgroundColor: '#E8F5E8', borderWidth: 2, borderColor: '#4CAF50' },
+  incorrectOption: { backgroundColor: '#FFCDD2', borderWidth: 3, borderColor: '#F44336', transform: [{ scale: 0.95 }] },
+  optionImage: { width: 70, height: 70, marginBottom: 8 },
+  optionText: { fontSize: SIZES.base, color: COLORS.black, ...FONTS.medium, textAlign: 'center' },
+  nextButton: { backgroundColor: COLORS.orange, borderRadius: SIZES.radius, paddingVertical: SIZES.padding, paddingHorizontal: 40, marginTop: 25, ...SHADOWS.small },
+  nextButtonText: { fontSize: SIZES.large, color: COLORS.white, ...FONTS.bold },
+  skipButton: { position: 'absolute', right: 20, top: 10, backgroundColor: COLORS.grey, paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
+  skipText: { color: COLORS.white, fontWeight: 'bold', fontSize: 12 }
 });

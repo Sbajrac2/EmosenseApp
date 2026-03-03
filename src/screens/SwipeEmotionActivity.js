@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, PanResponder, Animated, Image, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import SpeakerButton from '../components/SpeakerButton';
 import TTSToggle from '../components/TTSToggle';
+import HomeButton from '../components/HomeButton';
 import { COLORS, SIZES, FONTS } from '../constants/theme';
 import { IMAGES } from '../constants/images';
 import TTS from '../utils/textToSpeech';
@@ -20,34 +21,62 @@ export default function SwipeEmotionActivity({ navigation, route }) {
   const pan = new Animated.ValueXY();
   const { isTTSEnabled } = useTTS();
 
+  // Clean up when leaving the screen - stop TTS
+  useEffect(() => {
+    return () => {
+      TTS.stop();
+    };
+  }, []);
+
   const getQuestionsForEmotion = (targetEmotion) => {
     const allQuestions = {
       happy: [
-        { image: require('../../assets/images/Happy.png'), emotion: '', correctSide: 'right', hint: 'Look at the smile and bright eyes' },
-        { image: require('../../assets/images/Excited.png'), emotion: '', correctSide: 'right', hint: 'Notice the wide smile and raised eyebrows' },
-        { image: IMAGES.angry_female_1, emotion: '', correctSide: 'left', hint: 'See the frown and tense face muscles' },
+        { image: require('../../assets/Images2/Asian Man/AM Happy.png'), emotion: '', correctSide: 'right', hint: 'Look at the smile and bright eyes' },
+        { image: require('../../assets/Images2/Asian Woman/AW Happy.png'), emotion: '', correctSide: 'right', hint: 'Notice the joyful expression' },
+        { image: require('../../assets/Images2/Black Man/BM Happy.png'), emotion: '', correctSide: 'right', hint: 'See the genuine smile' },
+        { image: require('../../assets/Images2/Black Woman/BW Happy.png'), emotion: '', correctSide: 'right', hint: 'Look at the cheerful face' },
+        { image: require('../../assets/Images2/Caucasian Man/CM Happy.png'), emotion: '', correctSide: 'right', hint: 'Notice the positive expression' },
+        { image: require('../../assets/Images2/Caucasian Woman/CW Happy.png'), emotion: '', correctSide: 'right', hint: 'See the bright smile' },
+        { image: require('../../assets/Images2/Old Man/OM happy.png'), emotion: '', correctSide: 'right', hint: 'Look at the content expression' },
+        { image: require('../../assets/Images2/Old Woman/OW Happy.png'), emotion: '', correctSide: 'right', hint: 'Notice the warm smile' },
+        { image: require('../../assets/Images2/South Asian Man/SAM Happy.png'), emotion: '', correctSide: 'right', hint: 'See the joyful face' },
+        { image: require('../../assets/Images2/South Asian Woman/SAW Happy.png'), emotion: '', correctSide: 'right', hint: 'Look at the happy expression' }
       ],
       angry: [
-        { image: IMAGES.angry_female_1, emotion: '', correctSide: 'left', hint: 'Look at the furrowed brows and tight lips' },
-        { image: IMAGES.angry_male_1, emotion: '', correctSide: 'left', hint: 'Notice the clenched jaw and narrowed eyes' },
-        { image: IMAGES.angry_female_2, emotion: '', correctSide: 'left', hint: 'See the downward mouth and tense forehead' },
-        { image: IMAGES.angry_male_2, emotion: '', correctSide: 'left', hint: 'Look at the stern expression and tight face' },
-        { image: require('../../assets/images/Happy.png'), emotion: '', correctSide: 'right', hint: 'Notice the relaxed, smiling face' },
+        { image: require('../../assets/Images2/Asian Man/AM Angry.png'), emotion: '', correctSide: 'left', hint: 'Look at the furrowed brows' },
+        { image: require('../../assets/Images2/Asian Woman/AW Angry.png'), emotion: '', correctSide: 'left', hint: 'Notice the tense face' },
+        { image: require('../../assets/Images2/Black Man/BM Angry.png'), emotion: '', correctSide: 'left', hint: 'See the stern expression' },
+        { image: require('../../assets/Images2/Black Woman/BW Angry.png'), emotion: '', correctSide: 'left', hint: 'Look at the angry face' },
+        { image: require('../../assets/Images2/Caucasian Man/CM Angry.png'), emotion: '', correctSide: 'left', hint: 'Notice the frustrated look' },
+        { image: require('../../assets/Images2/Caucasian Woman/CW ANgry.png'), emotion: '', correctSide: 'left', hint: 'See the upset expression' },
+        { image: require('../../assets/Images2/Old Man/OM angry.png'), emotion: '', correctSide: 'left', hint: 'Look at the cross face' },
+        { image: require('../../assets/Images2/Old Woman/OW Angry.png'), emotion: '', correctSide: 'left', hint: 'Notice the mad expression' },
+        { image: require('../../assets/Images2/South Asian Man/SAM Angry.png'), emotion: '', correctSide: 'left', hint: 'See the angry look' },
+        { image: require('../../assets/Images2/South Asian Woman/SAW angry.png'), emotion: '', correctSide: 'left', hint: 'Look at the irritated face' }
       ],
       sad: [
-        { image: require('../../assets/images/Sad.png'), emotion: '', correctSide: 'left', hint: 'Look at the droopy eyes and downturned mouth' },
-        { image: IMAGES.angry_female_3, emotion: '', correctSide: 'left', hint: 'See the worried expression and tense brows' },
-        { image: require('../../assets/images/Happy.png'), emotion: '', correctSide: 'right', hint: 'Notice the bright, cheerful expression' },
+        { image: require('../../assets/Images2/Asian Man/AM Sad.png'), emotion: '', correctSide: 'left', hint: 'Look at the droopy eyes' },
+        { image: require('../../assets/Images2/Asian Woman/AW Sad.png'), emotion: '', correctSide: 'left', hint: 'Notice the downturned mouth' },
+        { image: require('../../assets/Images2/Black Man/BM Sad.png'), emotion: '', correctSide: 'left', hint: 'See the sad expression' },
+        { image: require('../../assets/Images2/Caucasian Man/CM Sad.png'), emotion: '', correctSide: 'left', hint: 'Look at the unhappy face' },
+        { image: require('../../assets/Images2/Caucasian Woman/CW Sad.png'), emotion: '', correctSide: 'left', hint: 'Notice the sorrowful look' },
+        { image: require('../../assets/Images2/Old Man/OM sad.png'), emotion: '', correctSide: 'left', hint: 'See the melancholy expression' },
+        { image: require('../../assets/Images2/Old Woman/OW sad.png'), emotion: '', correctSide: 'left', hint: 'Look at the dejected face' },
+        { image: require('../../assets/Images2/South Asian Man/SAM Sad.png'), emotion: '', correctSide: 'left', hint: 'Notice the gloomy expression' },
+        { image: require('../../assets/Images2/South Asian Woman/SAW sadpng.png'), emotion: '', correctSide: 'left', hint: 'See the upset look' },
+        { image: require('../../assets/Images2/Asian Man/AM Crying.png'), emotion: '', correctSide: 'left', hint: 'Look at the tearful face' }
       ],
       mixed: [
-        { image: require('../../assets/images/Happy.png'), emotion: '', correctSide: 'right', hint: 'Look at the smile and bright eyes' },
-        { image: require('../../assets/images/Sad.png'), emotion: '', correctSide: 'left', hint: 'See the droopy eyes and sad mouth' },
-        { image: IMAGES.angry_female_1, emotion: '', correctSide: 'left', hint: 'Notice the frown and tense muscles' },
-        { image: IMAGES.angry_male_1, emotion: '', correctSide: 'left', hint: 'Look at the stern, angry expression' },
-        { image: require('../../assets/images/Excited.png'), emotion: '', correctSide: 'right', hint: 'See the wide smile and excited eyes' },
-        { image: require('../../assets/images/Surprised.png'), emotion: '', correctSide: 'right', hint: 'Notice the wide eyes and open mouth - usually positive surprise' },
-        { image: require('../../assets/images/Worried_real.png'), emotion: '', correctSide: 'left', hint: 'Look at the concerned, tense expression' },
-        { image: require('../../assets/images/TIred_real.png'), emotion: '', correctSide: 'left', hint: 'See the droopy, low-energy expression' },
+        { image: require('../../assets/Images2/Asian Man/AM Happy.png'), emotion: '', correctSide: 'right', hint: 'Look at the smile and bright eyes' },
+        { image: require('../../assets/Images2/Black Woman/BW Angry.png'), emotion: '', correctSide: 'left', hint: 'See the frown and tense muscles' },
+        { image: require('../../assets/Images2/Caucasian Man/CM Sad.png'), emotion: '', correctSide: 'left', hint: 'Notice the sad, droopy expression' },
+        { image: require('../../assets/Images2/Old Woman/OW Happy.png'), emotion: '', correctSide: 'right', hint: 'See the cheerful, positive face' },
+        { image: require('../../assets/Images2/South Asian Man/SAM Angry.png'), emotion: '', correctSide: 'left', hint: 'Look at the stern, angry expression' },
+        { image: require('../../assets/Images2/Asian Woman/AW Shocked.png'), emotion: '', correctSide: 'right', hint: 'Notice the surprised, wide eyes - usually positive' },
+        { image: require('../../assets/Images2/Black Man/BM Shocked.png'), emotion: '', correctSide: 'right', hint: 'See the amazed expression' },
+        { image: require('../../assets/Images2/Caucasian Woman/CW Crying.png'), emotion: '', correctSide: 'left', hint: 'Look at the tearful, sad face' },
+        { image: require('../../assets/Images2/Old Man/OM happy.png'), emotion: '', correctSide: 'right', hint: 'Notice the content, peaceful expression' },
+        { image: require('../../assets/Images2/South Asian Woman/SAW cry.png.png'), emotion: '', correctSide: 'left', hint: 'See the crying, upset expression' }
       ]
     };
     return allQuestions[targetEmotion] || allQuestions.mixed;
@@ -65,7 +94,7 @@ export default function SwipeEmotionActivity({ navigation, route }) {
         
         if (isCorrect) {
           setScore(score + 1);
-          const feedback = ['Well done!', 'That\'s right!', 'Nice work!', 'Correct!', 'Great!'][Math.floor(Math.random() * 5)];
+          const feedback = ['Good!', 'Right!', 'Nice!', 'Correct!', 'Great!'][Math.floor(Math.random() * 5)];
           if (isTTSEnabled) await TTS.speakFeedback(feedback, true);
           
           if (currentQuestion < questions.length - 1) {
@@ -84,7 +113,6 @@ export default function SwipeEmotionActivity({ navigation, route }) {
         } else {
           if (isTTSEnabled) {
             await TTS.speakFeedback('Try again', false);
-            await TTS.speakHint(questions[currentQuestion].hint);
           }
           setShowHintMessage(true);
           setAttempts(attempts + 1);
@@ -97,25 +125,28 @@ export default function SwipeEmotionActivity({ navigation, route }) {
   });
 
   const handleHome = () => {
-    navigation.navigate('MainTabs');
+    TTS.stop();
+    navigation.navigate('LessonsMain');
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <TTSToggle />
+      <HomeButton onPress={handleHome} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => setShowHintMessage(true)}>
-            <Image source={IMAGES.hint} style={styles.topBarIcon} />
+            <Image source={IMAGES.hint} resizeMode="contain" style={styles.topBarIcon} />
           </TouchableOpacity>
           
-          <TouchableOpacity onPress={handleHome} style={styles.homeButton}>
-            <Text style={styles.homeIcon}>🏠</Text>
+          {/* SKIP BUTTON - Comment this line to remove: */}
+          <TouchableOpacity style={styles.skipButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.skipText}>Skip</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => setShowHelpMessage(true)}>
-            <Image source={IMAGES.help} style={styles.topBarIcon} />
+            <Image source={IMAGES.help} resizeMode="contain" style={styles.topBarIcon} />
           </TouchableOpacity>
         </View>
 
@@ -208,4 +239,6 @@ const styles = StyleSheet.create({
   emotionText: { fontSize: SIZES.xlarge, color: COLORS.black },
   instruction: { fontSize: SIZES.base, color: COLORS.grey, textAlign: 'center', marginBottom: 10 },
   progress: { fontSize: SIZES.base, color: COLORS.grey },
+  skipButton: { backgroundColor: COLORS.orange, paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
+  skipText: { color: COLORS.white, fontWeight: 'bold', fontSize: 14 },
 });

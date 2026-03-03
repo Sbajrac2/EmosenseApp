@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { TTSProvider } from "./src/contexts/TTSContext";
 import { AccessibilityProvider } from "./src/contexts/AccessibilityContext";
 import { RewardProvider } from "./src/contexts/RewardContext";
+import { UserProvider } from "./src/contexts/UserContext";
 import AppNavigator from "./src/navigation/AppNavigator";
 
 function SimpleTest() {
@@ -51,12 +52,14 @@ const styles = StyleSheet.create({
 
 export default function App() {
   return (
-    <TTSProvider>
-      <AccessibilityProvider>
-        <RewardProvider>
-          <SimpleTest />
-        </RewardProvider>
-      </AccessibilityProvider>
-    </TTSProvider>
+    <UserProvider>
+      <TTSProvider>
+        <AccessibilityProvider>
+          <RewardProvider>
+            <SimpleTest />
+          </RewardProvider>
+        </AccessibilityProvider>
+      </TTSProvider>
+    </UserProvider>
   );
 }

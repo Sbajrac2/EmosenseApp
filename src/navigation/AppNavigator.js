@@ -22,7 +22,9 @@ import EmotionSortActivity from '../screens/EmotionSortActivity';
 import EmotionStoryActivity from '../screens/EmotionStoryActivity';
 import BodyLanguageActivity from '../screens/BodyLanguageActivity';
 import EmotionIntensityActivity from '../screens/EmotionIntensityActivity';
+import AdvancedEmotionSortActivity from '../screens/AdvancedEmotionSortActivity';
 import BuildAFaceActivity from '../screens/BuildAFaceActivity';
+import SettingsScreen from '../screens/SettingsScreen';
 import BadgesScreen from '../screens/BadgesScreen';
 
 import { COLORS } from '../constants/theme';
@@ -74,6 +76,7 @@ function LessonStackNavigator() {
       <LessonStack.Screen name="EmotionStoryActivity" component={EmotionStoryActivity} />
       <LessonStack.Screen name="BodyLanguageActivity" component={BodyLanguageActivity} />
       <LessonStack.Screen name="EmotionIntensityActivity" component={EmotionIntensityActivity} />
+      <LessonStack.Screen name="AdvancedEmotionSortActivity" component={AdvancedEmotionSortActivity} />
       <LessonStack.Screen name="BuildAFaceActivity" component={BuildAFaceActivity} />
 
       <LessonStack.Screen name="LessonSummary" component={LessonSummaryScreen} />
@@ -100,10 +103,10 @@ function TabNavigator() {
           return (
             <Image
               source={iconSource}
+              resizeMode="contain"
               style={{
                 width: size,
                 height: size,
-                resizeMode: 'contain',
                 marginBottom: -3,
                 opacity: focused ? 1 : 0.6,
               }}
@@ -136,6 +139,7 @@ export default function AppNavigator() {
       <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="MainTabs" component={TabNavigator} />
+        <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
         <Stack.Screen name="BadgesScreen" component={BadgesScreen} />
       </Stack.Navigator>
     </NavigationContainer>

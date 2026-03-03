@@ -10,6 +10,7 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import SimpleIcon from '../components/SimpleIcon';
 import SpeakerButton from '../components/SpeakerButton';
 import TTSToggle from '../components/TTSToggle';
@@ -94,42 +95,43 @@ export default function LessonsScreen({ navigation, route }) {
       return;
     }
 
-    if (isTTSEnabled) await TTS.speak(`Starting lesson ${lesson.id}`);
+    if (isTTSEnabled) await TTS.speak(`Lesson ${lesson.id}`);
 
     // Navigate to different activities based on lesson type
+    const taskNumber = Math.floor(Math.random() * 10) + 1; // Random task 1-10
     switch (lesson.type) {
       case 'emoji':
-        navigation.navigate('MatchingExercise', { lessonId: lesson.id, lessonType: 'emoji', source: 'lessons' });
+        navigation.navigate('MatchingExercise', { lessonId: lesson.id, lessonType: 'emoji', source: 'lessons', taskNumber });
         break;
       case 'cartoon':
-        navigation.navigate('SwipeEmotionActivity', { lessonType: 'cartoon', source: 'lessons' });
+        navigation.navigate('SwipeEmotionActivity', { lessonType: 'cartoon', source: 'lessons', taskNumber });
         break;
       case 'real':
-        navigation.navigate('PictureEmotionActivity', { lessonType: 'real', source: 'lessons' });
+        navigation.navigate('PictureEmotionActivity', { lessonType: 'real', source: 'lessons', taskNumber });
         break;
       case 'video':
-        navigation.navigate('VideoEmotionActivity', { lessonType: 'video', source: 'lessons' });
+        navigation.navigate('VideoEmotionActivity', { lessonType: 'video', source: 'lessons', taskNumber });
         break;
       case 'mixed':
-        navigation.navigate('EmotionMatchingActivity', { lessonType: 'mixed', source: 'lessons' });
+        navigation.navigate('EmotionMatchingActivity', { lessonType: 'mixed', source: 'lessons', taskNumber });
         break;
       case 'chooseAll':
-        navigation.navigate('ChooseAllActivity', { lessonType: 'chooseAll', source: 'lessons' });
+        navigation.navigate('ChooseAllActivity', { lessonType: 'chooseAll', source: 'lessons', taskNumber });
         break;
       case 'bodyLanguage':
-        navigation.navigate('BodyLanguageActivity', { source: 'lessons' });
+        navigation.navigate('BodyLanguageActivity', { source: 'lessons', taskNumber });
         break;
       case 'emotionSort':
-        navigation.navigate('EmotionSortActivity', { source: 'lessons' });
+        navigation.navigate('AdvancedEmotionSortActivity', { source: 'lessons', taskNumber });
         break;
       case 'intensity':
-        navigation.navigate('EmotionIntensityActivity', { source: 'lessons' });
+        navigation.navigate('EmotionIntensityActivity', { source: 'lessons', taskNumber });
         break;
       case 'stories':
-        navigation.navigate('EmotionStoryActivity', { source: 'lessons' });
+        navigation.navigate('EmotionStoryActivity', { source: 'lessons', taskNumber });
         break;
       default:
-        navigation.navigate('MatchingExercise', { lessonId: lesson.id, source: 'lessons' });
+        navigation.navigate('MatchingExercise', { lessonId: lesson.id, source: 'lessons', taskNumber });
     }
 
     // Lesson progress will be updated when returning from completion
@@ -174,22 +176,42 @@ export default function LessonsScreen({ navigation, route }) {
       <TTSToggle />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Lessons</Text>
+        {/* SKIP BUTTON - Comment this line to remove: */}
+        <TouchableOpacity style={styles.skipButton} onPress={() => setCurrentLesson(currentLesson + 1)}>
+          <Text style={styles.skipText}>Skip Lesson</Text>
+        </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={{ height: scrollHeight }}>
-        {/* Road */}
-        <Image
-          source={IMAGES.lessonRoad}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: roadLeft,
-            width: roadWidth,
-            height: scrollHeight,
-            zIndex: 0,
-          }}
-          resizeMode="cover"
-          fadeDuration={0}
-        />
+        {/* SVG Curved Road */}
+        <Svg height={scrollHeight} width={SCREEN_WIDTH} style={styles.roadSvg}>
+          <Path
+            d={`M ${SCREEN_WIDTH/2} 0 
+               Q ${SCREEN_WIDTH - 50} ${lessonSpacing} ${SCREEN_WIDTH/2} ${lessonSpacing * 2}
+               Q 50 ${lessonSpacing * 3} ${SCREEN_WIDTH/2} ${lessonSpacing * 4}
+               Q ${SCREEN_WIDTH - 50} ${lessonSpacing * 5} ${SCREEN_WIDTH/2} ${lessonSpacing * 6}
+               Q 50 ${lessonSpacing * 7} ${SCREEN_WIDTH/2} ${lessonSpacing * 8}
+               Q ${SCREEN_WIDTH - 50} ${lessonSpacing * 9} ${SCREEN_WIDTH/2} ${lessonSpacing * 10}
+               L ${SCREEN_WIDTH/2} ${scrollHeight}`}
+            stroke="#666666"
+            strokeWidth="80"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <Path
+            d={`M ${SCREEN_WIDTH/2} 0 
+               Q ${SCREEN_WIDTH - 50} ${lessonSpacing} ${SCREEN_WIDTH/2} ${lessonSpacing * 2}
+               Q 50 ${lessonSpacing * 3} ${SCREEN_WIDTH/2} ${lessonSpacing * 4}
+               Q ${SCREEN_WIDTH - 50} ${lessonSpacing * 5} ${SCREEN_WIDTH/2} ${lessonSpacing * 6}
+               Q 50 ${lessonSpacing * 7} ${SCREEN_WIDTH/2} ${lessonSpacing * 8}
+               Q ${SCREEN_WIDTH - 50} ${lessonSpacing * 9} ${SCREEN_WIDTH/2} ${lessonSpacing * 10}
+               L ${SCREEN_WIDTH/2} ${scrollHeight}`}
+            stroke="#FFFFFF"
+            strokeWidth="4"
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray="20,15"
+          />
+        </Svg>
 
         {/* Lessons */}
         {lessons.map((lesson, index) => {
@@ -305,6 +327,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.lightGreen },
   header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 5, alignItems: 'center' },
   headerTitle: { fontSize: 32, color: COLORS.black, fontWeight: 'bold' },
+  skipButton: { position: 'absolute', right: 20, top: 15, backgroundColor: COLORS.orange, paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
+  skipText: { color: COLORS.white, fontWeight: 'bold', fontSize: 14 },
   lessonSign: {
     borderWidth: 2,
     borderColor: COLORS.black,
@@ -338,5 +362,17 @@ const styles = StyleSheet.create({
   },
   lessonSpeaker: {
     marginTop: 2,
+  },
+  roadSvg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 0,
+  },
+  roadLine: {
+    width: 4,
+    height: 40,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 2,
   },
 });

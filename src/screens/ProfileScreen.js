@@ -13,6 +13,7 @@ import {
 import { COLORS, SIZES, FONTS, SHADOWS } from '../constants/theme';
 import { IMAGES } from '../constants/images';
 import { useTTS } from '../contexts/TTSContext';
+import { useUser } from '../contexts/UserContext';
 import { useRewards } from '../contexts/RewardContext';
 
 const { width } = Dimensions.get('window');
@@ -20,6 +21,7 @@ const { width } = Dimensions.get('window');
 export default function ProfileScreen({ navigation }) {
   const { isTTSEnabled, toggleTTS } = useTTS();
   const { badges, streak } = useRewards();
+  const { username, getUserImage } = useUser();
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -28,8 +30,8 @@ export default function ProfileScreen({ navigation }) {
       >
         {/* User avatar */}
         <View style={styles.avatarContainer}>
-          <Image source={IMAGES.userAvatar} style={styles.avatar} />
-          <Text style={styles.name}>Jane Doe</Text>
+          <Image source={getUserImage()} style={styles.avatar} />
+          <Text style={styles.name}>{username}</Text>
           <Text style={styles.username}>@janedoe</Text>
         </View>
 
@@ -63,7 +65,7 @@ export default function ProfileScreen({ navigation }) {
         {/* Buttons / actions */}
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => navigation.navigate('Settings')}
+          onPress={() => navigation.navigate('SettingsScreen')}
         >
           <Text style={styles.actionText}>Settings</Text>
         </TouchableOpacity>

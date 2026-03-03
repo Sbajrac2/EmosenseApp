@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import SimpleIcon from '../components/SimpleIcon';
 import TTSToggle from '../components/TTSToggle';
+import HomeButton from '../components/HomeButton';
 import { COLORS, SIZES, FONTS, SHADOWS } from '../constants/theme';
 import { IMAGES } from '../constants/images';
 import TTS from '../utils/textToSpeech';
@@ -29,15 +30,29 @@ export default function MatchingExerciseScreen({ navigation, route }) {
   const [showSecondChance, setShowSecondChance] = useState(false);
   const { isTTSEnabled } = useTTS();
 
+  // Clean up when leaving the screen - stop TTS
+  useEffect(() => {
+    return () => {
+      TTS.stop();
+    };
+  }, []);
+
+  const handleGoHome = () => {
+    TTS.stop();
+    navigation.navigate('LessonsMain');
+  };
+
   const questions = [
-    { id: 1, type: 'emoji', image: '😠', correctAnswer: 'Angry', options: ['Angry', 'Happy', 'Sad'], lessonTitle: 'Feelings', hint: 'Look at the eyebrows and mouth' },
-    { id: 2, type: 'emoji', image: '😰', correctAnswer: 'Sad', options: ['Angry', 'Happy', 'Sad'], lessonTitle: 'Feelings', hint: 'Notice the downward mouth' },
-    { id: 3, type: 'emoji', image: '😄', correctAnswer: 'Happy', options: ['Angry', 'Happy', 'Sad'], lessonTitle: 'Feelings', hint: 'See the big smile' },
-    { id: 4, type: 'emoji', image: '😴', correctAnswer: 'Tired', options: ['Tired', 'Sad', 'Angry'], lessonTitle: 'Feelings', hint: 'Eyes are closed for sleep' },
-    { id: 5, type: 'emoji', image: '😮', correctAnswer: 'Surprised', options: ['Surprised', 'Happy', 'Angry'], lessonTitle: 'Feelings', hint: 'Look at the wide open mouth' },
-    { id: 6, type: 'emoji', image: '😟', correctAnswer: 'Worried', options: ['Worried', 'Happy', 'Excited'], lessonTitle: 'Feelings', hint: 'Notice the concerned expression' },
-    { id: 7, type: 'emoji', image: '🤔', correctAnswer: 'Thinking', options: ['Thinking', 'Sleeping', 'Angry'], lessonTitle: 'Feelings', hint: 'See the hand on the chin' },
-    { id: 8, type: 'emoji', image: '😊', correctAnswer: 'Content', options: ['Content', 'Sad', 'Angry'], lessonTitle: 'Feelings', hint: 'A gentle, peaceful smile' },
+    { id: 1, type: 'emoji', image: '😠', correctAnswer: 'Angry', options: ['Angry', 'Happy', 'Sad'], lessonTitle: 'Basic Emotions', hint: 'Look at the eyebrows and mouth' },
+    { id: 2, type: 'emoji', image: '😰', correctAnswer: 'Sad', options: ['Angry', 'Happy', 'Sad'], lessonTitle: 'Basic Emotions', hint: 'Notice the downward mouth' },
+    { id: 3, type: 'emoji', image: '😄', correctAnswer: 'Happy', options: ['Angry', 'Happy', 'Sad'], lessonTitle: 'Basic Emotions', hint: 'See the big smile' },
+    { id: 4, type: 'emoji', image: '😴', correctAnswer: 'Tired', options: ['Tired', 'Sad', 'Angry'], lessonTitle: 'Basic Emotions', hint: 'Eyes are closed for sleep' },
+    { id: 5, type: 'emoji', image: '😮', correctAnswer: 'Surprised', options: ['Surprised', 'Happy', 'Angry'], lessonTitle: 'Basic Emotions', hint: 'Look at the wide open mouth' },
+    { id: 6, type: 'emoji', image: '😟', correctAnswer: 'Worried', options: ['Worried', 'Happy', 'Excited'], lessonTitle: 'Basic Emotions', hint: 'Notice the concerned expression' },
+    { id: 7, type: 'emoji', image: '🤔', correctAnswer: 'Thinking', options: ['Thinking', 'Sleeping', 'Angry'], lessonTitle: 'Basic Emotions', hint: 'See the hand on the chin' },
+    { id: 8, type: 'emoji', image: '😊', correctAnswer: 'Content', options: ['Content', 'Sad', 'Angry'], lessonTitle: 'Basic Emotions', hint: 'A gentle, peaceful smile' },
+    { id: 9, type: 'emoji', image: '😢', correctAnswer: 'Crying', options: ['Crying', 'Happy', 'Angry'], lessonTitle: 'Basic Emotions', hint: 'See the tear drop' },
+    { id: 10, type: 'emoji', image: '🤗', correctAnswer: 'Excited', options: ['Excited', 'Sad', 'Worried'], lessonTitle: 'Basic Emotions', hint: 'Arms open wide with joy' }
   ];
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -100,14 +115,15 @@ export default function MatchingExerciseScreen({ navigation, route }) {
   return (
     <SafeAreaView style={styles.container}>
       <TTSToggle />
+      <HomeButton onPress={handleGoHome} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => setShowHintMessage(true)}>
-            <Image source={IMAGES.hint} style={styles.topBarIcon} />
+            <Image source={IMAGES.hint} resizeMode="contain" style={styles.topBarIcon} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setShowHelpMessage(true)}>
-            <Image source={IMAGES.help} style={styles.topBarIcon} />
+            <Image source={IMAGES.help} resizeMode="contain" style={styles.topBarIcon} />
           </TouchableOpacity>
         </View>
 
