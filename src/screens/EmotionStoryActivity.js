@@ -1,4 +1,4 @@
-git remote add origin https://github.com/Sbajrac2/EmosenseApp.gitimport React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, ScrollView } from 'react-native';
 import TTSToggle from '../components/TTSToggle';
 import HomeButton from '../components/HomeButton';

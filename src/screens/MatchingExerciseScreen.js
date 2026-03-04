@@ -59,8 +59,10 @@ export default function MatchingExerciseScreen({ navigation, route }) {
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
 
   const handleAnswerSelect = async (answer) => {
-    if (selectedAnswer !== null && !showSecondChance) return;
+    // If already correct, don't allow changing (lock in the correct answer)
+    if (selectedAnswer === currentQuestion.correctAnswer) return;
     
+    // Allow selecting different options after a wrong answer
     setSelectedAnswer(answer);
     setAttempts(attempts + 1);
     
@@ -74,9 +76,6 @@ export default function MatchingExerciseScreen({ navigation, route }) {
         if (isTTSEnabled) await TTS.speakFeedback('Try again', false);
         setShowHintMessage(true);
         setShowSecondChance(true);
-        setTimeout(() => {
-          setSelectedAnswer(null);
-        }, 2000);
       } else {
         if (isTTSEnabled) await TTS.speakFeedback('Nice try', false);
         setShowSecondChance(false);

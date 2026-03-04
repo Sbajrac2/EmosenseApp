@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, Dimensions, ScrollView, Animated } from 'react-native';
 
 import SpeakerButton from '../components/SpeakerButton';
@@ -27,6 +27,13 @@ export default function PictureEmotionActivity({ navigation, route }) {
   const [showFeedback, setShowFeedback] = useState(null);
   const [feedbackAnimation] = useState(new Animated.Value(0));
   const { isTTSEnabled } = useTTS();
+
+  // Clean up when leaving the screen - stop TTS
+  useEffect(() => {
+    return () => {
+      TTS.stop();
+    };
+  }, []);
   
   const getTasksForEmotion = (targetEmotion) => {
     const baseImages = {
@@ -178,16 +185,20 @@ export default function PictureEmotionActivity({ navigation, route }) {
   };
 
   const handleAnswerSelect = async (answer) => {
-    if (selectedAnswer) return;
+    // If already correct, don't allow changing (lock in the correct answer)
+    if (selectedAnswer === tasks[currentTask].correctAnswer) return;
     
+    // Allow selecting different options after a wrong answer
     setSelectedAnswer(answer);
     
     if (answer === tasks[currentTask].correctAnswer) {
       showFeedbackAnimation(true);
       if (isTTSEnabled) await TTS.speakFeedback('Great!', true);
+      setAttempts(0);
     } else {
       showFeedbackAnimation(false);
       if (isTTSEnabled) await TTS.speakFeedback('Try again', false);
+      setAttempts(attempts + 1);
     }
   };
 
